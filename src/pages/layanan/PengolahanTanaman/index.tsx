@@ -2,7 +2,6 @@ import React from 'react'
 import Navbar from '../../../component/includes/navbar'
 import HeroBanner from '../../../component/includes/banner'
 import Footer from '../../../component/includes/footer'
-import ProductsPageMarketplace from '../../../component/includes/product'
 
 
 function PengolahanTanaman() {
@@ -12,7 +11,6 @@ function PengolahanTanaman() {
       <main className="flex-grow">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <HeroBanner/>
-          <ProductsPageMarketplace/>
         </div>
       </main>
       <Footer />

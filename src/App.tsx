@@ -18,6 +18,16 @@ import WisataEdukasi from './pages/layanan/WisataEdukasi';
 import PelatihanWorkshop from './pages/layanan/PelatihanWorkshop';
 import Dashboard from './pages/Dashboard';
 import ManagemenUsers from './pages/Dashboard/users';
+import LoginPage from './pages/Auth/login';
+import RegisterPage from './pages/Auth/register';
+import Profile from './pages/profile';
+import DashboardProduct from './pages/Dashboard/product/productList';
+import DashboardProductCategory from './pages/Dashboard/product/productCategory';
+import ProtectedRoute from './services/Protected/ProtectedRoute';
+import UnauthorizedPage from './services/Protected/Unauthorized';
+import DasboardServiceCategoryPage from './pages/Dashboard/Layanan/Layanan-Category';
+import DashboardServicePage from './pages/Dashboard/Layanan/LayananList';
+
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -42,12 +52,14 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Home />} />
+        <Route path= "/" element={<Home />} />
+        <Route path= "/login" element={<LoginPage />} />
+        <Route path= "/register" element={<RegisterPage />} />
         <Route path="/artikel" element={<Article />} />
         <Route path="/tentang" element={<About />} />
         <Route path="/detection-ai" element={<DetectionPage />} />
+        <Route path="/profile" element={<Profile/>} />
         <Route path="/artikel/:slug" element={<ShowArticle />} />
-
 
         <Route path="/layanan/griya-jamu" element={<GriyaJamu />} />
         <Route path="/layanan/rawat-jalan" element={<RawatJalan />} />
@@ -60,18 +72,62 @@ function App() {
         <Route path="/layanan/pelatihan-workshop" element={<PelatihanWorkshop />} />
         <Route path="/layanan/produk-layanan" element={<ProductLayanan />} />
 
+        <Route 
+          path="/dashboard" 
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/users" 
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <ManagemenUsers />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/products-list" 
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <DashboardProduct />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/product-category" 
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <DashboardProductCategory />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/service-category" 
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <DasboardServiceCategoryPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/dashboard/services" 
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <DashboardServicePage/>
+            </ProtectedRoute>
+          } 
+        />
 
-        <Route path="/dashboard" element={<Dashboard/>} />
-        <Route path="/dashboard/users" element={<ManagemenUsers/>} />
-        
+        {/* Unauthorized page (optional) */}
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
-
-        
-        
+        {/* Catch-all route */}
         <Route path="*" element={<NotFound />} />  
       </Routes>
     </Router>
   );
 }
-
 export default App;
