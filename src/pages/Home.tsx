@@ -5,6 +5,7 @@ import Blog from "../component/includes/artikel";
 import Faq from "../component/particle/faq";
 import HeroBanner from "../component/includes/banner";
 import { ProductGrid } from "../component/includes/product";
+import ServiceGrid from "../component/includes/card/Layanan";
 
 function Home() {
   return (
@@ -28,6 +29,19 @@ function Home() {
                   maxItems={8} // Optional: limit number of items shown
                   showSort={false}
                 />
+              </div>
+            </div>
+          </div>
+          <div className="py-8 mt-5">
+            <div className="container mx-auto px-4">
+              <h1 className="text-3xl font-bold text-gray-900 text-center">
+                Layanan & Produk
+              </h1>
+              <p className="mt-2 text-gray-600 text-center">
+                Temukan layanan dan produk herbal terbaik untuk kesehatan Anda
+              </p>
+              <div className="mt-8">
+                <ServiceGrid />
               </div>
             </div>
           </div>
