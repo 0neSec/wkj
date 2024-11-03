@@ -17,10 +17,10 @@ function Home() {
           <div className="py-8 mt-5">
             <div className="container mx-auto px-4">
               <h1 className="text-3xl font-bold text-gray-900 text-center">
-                Layanan & Produk
+                Produk
               </h1>
               <p className="mt-2 text-gray-600 text-center">
-                Temukan layanan dan produk herbal terbaik untuk kesehatan Anda
+                Temukan produk herbal terbaik untuk kesehatan Anda
               </p>
               <div className="p-10">
                 <ProductGrid
@@ -44,7 +44,7 @@ function Home() {
             </div>
           </div>
           <Blog isHomePage={true} />
-          <Faq />
+          {/* <Faq /> */}
         </div>
       </main>
       <Footer />
