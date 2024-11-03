@@ -4,17 +4,9 @@ import axios, { AxiosError, AxiosInstance } from 'axios';
 export interface ProductCategory {
   id: string;
   name: string;
+  count?:string;
 }
 
-export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  imageUrl: string;
-  product_category_id: string;
-  category_name?: string;
-}
 
 // Data transfer types
 export interface CreateCategoryData {

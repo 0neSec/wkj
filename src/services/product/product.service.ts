@@ -1,33 +1,74 @@
 import axios, { AxiosError, AxiosInstance } from 'axios';
 import { ProductCategory } from './product-category.service';
 
-
-// Types
+// Updated Types to match Golang structure
 export interface Product {
     id: string;
     name: string;
+    latin_name: string;
+    synonym: string;
+    familia: string;
+    part_used: string;
+    method_of_reproduction: string;
+    harvest_age: string;
+    morphology: string;
+    area_name: string;
+    efficacy: string;
+    utilization: string[];
+    composition: string[];
+    image_url: string;
+    research_results: string;
     description: string;
     price: number;
-    image_url: string;
+    unit_type: string;
     product_category_id: string;
-    category_name?: string; // Added field for category name
+    product_category?: ProductCategory;
+    category_name?: string;
+    created_at: string;
+    product_category_name: string;
+    updated_at: string;
 }
 
 export interface CreateProductData {
     name: string;
+    latin_name: string;
+    synonym: string;
+    familia: string;
+    part_used: string;
+    method_of_reproduction: string;
+    harvest_age: string;
+    morphology: string;
+    area_name: string;
+    efficacy: string;
+    utilization?: string[];
+    composition?: string[];
+    image: File;
+    research_results: string;
     description: string;
     price: number;
-    image: File;
+    unit_type: string;
     product_category_id: string;
-    category_name?: string; // Added field for category name
 }
 
 export interface UpdateProductData {
     id: string;
     name?: string;
+    latin_name?: string;
+    synonym?: string;
+    familia?: string;
+    part_used?: string;
+    method_of_reproduction?: string;
+    harvest_age?: string;
+    morphology?: string;
+    area_name?: string;
+    efficacy?: string;
+    utilization?: string[];
+    composition?: string[];
+    image?: File;
+    research_results?: string;
     description?: string;
     price?: number;
-    image?: File;
+    unit_type?: string;
     product_category_id?: string;
 }
 
@@ -38,13 +79,12 @@ class ProductService {
         const storageType = localStorage.getItem('storageType');
         const storage = storageType === 'local' ? localStorage : sessionStorage;
         const token = storage.getItem('token');
-        console.log('token : ',token);
         
         this.axiosInstance = axios.create({
             baseURL: process.env.REACT_APP_API_URL,
             timeout: 10000,
             headers: {
-                Authorization: `Bearer ${token}`, // Corrected syntax for Bearer token
+                Authorization: `Bearer ${token}`,
             },
         });
     }
@@ -52,59 +92,79 @@ class ProductService {
     async createProduct(data: CreateProductData): Promise<Product | undefined> {
         try {
             const formData = new FormData();
-            formData.append('name', data.name);
-            formData.append('description', data.description);
-            formData.append('price', data.price.toString());
-            formData.append('image', data.image);
-            formData.append('product_category_id', data.product_category_id);
+            Object.entries(data).forEach(([key, value]) => {
+                if (key === 'utilization' || key === 'composition') {
+                    if (value) {
+                        formData.append(key, JSON.stringify({ values: value }));
+                    }
+                } else if (key === 'image') {
+                    formData.append('image_url', value);
+                } else if (value !== undefined && value !== null) {
+                    formData.append(key, value.toString());
+                }
+            });
 
-            const categoryName = await this.getCategoryName(data.product_category_id);
-            formData.append('category_name', categoryName); // Append category name
-            
-            const response = await this.axiosInstance.post<Product>('/admin/product', formData, {
+            const response = await this.axiosInstance.post<{
+                message: string;
+                Product: Product;
+            }>('/admin/product', formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-            return response.data;
+            return response.data.Product;
         } catch (error) {
             this.handleError(error, 'Failed to create product');
-            return undefined; // Ensure return type consistency
+            return undefined;
         }
     }
 
     async getProduct(id: string): Promise<Product | undefined> {
         try {
-            const response = await this.axiosInstance.get<Product>(`/admin/product/${id}`);
-            return response.data;
+            const response = await this.axiosInstance.get<{
+                Product: Product;
+            }>(`/product/${id}`);
+            return response.data.Product;
         } catch (error) {
             this.handleError(error, 'Failed to retrieve product');
-            return undefined; // Ensure return type consistency
+            return undefined;
         }
     }
 
     async updateProduct(data: UpdateProductData): Promise<Product | undefined> {
         try {
             const formData = new FormData();
-            formData.append('name', data.name || '');
-            formData.append('description', data.description || '');
-            formData.append('price', data.price?.toString() || '');
-            formData.append('product_category_id', data.product_category_id || '');
-
-            const categoryName = await this.getCategoryName(data.product_category_id || '');
-            formData.append('category_name', categoryName); // Append category name
-
-            if (data.image) {
-                formData.append('image', data.image);
-            }
-
-            const response = await this.axiosInstance.put<Product>(`/admin/product/${data.id}`, formData, {
+            Object.entries(data).forEach(([key, value]) => {
+                if (key === 'utilization' || key === 'composition') {
+                    if (value) {
+                        formData.append(key, JSON.stringify({ values: value }));
+                    }
+                } else if (key === 'image') {
+                    formData.append('image_url', value);
+                } else if (value !== undefined && value !== null) {
+                    formData.append(key, value.toString());
+                }
+            });
+    
+            const response = await this.axiosInstance.put<{
+                message: string;
+                Product: Product;
+            }>(`/admin/product/${data.id}`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-            return response.data;
+    
+            return response.data.Product;
+    
         } catch (error) {
+            // Check if error is AxiosError with 409 (conflict)
+            if (error instanceof AxiosError) {
+                if (error.response?.status === 409) {
+                    throw new Error("Conflict: A product with this data already exists.");
+                }
+            }
             this.handleError(error, 'Failed to update product');
-            return undefined; // Ensure return type consistency
+            return undefined;
         }
     }
+    
 
     async deleteProduct(id: string): Promise<void> {
         try {
@@ -116,11 +176,13 @@ class ProductService {
 
     async getAllProducts(): Promise<Product[]> {
         try {
-            const response = await this.axiosInstance.get<{ Product: Product[] }>('/product');
-            return response.data.Product;
+            const response = await this.axiosInstance.get<{
+                Products: Product[];
+            }>('/product');
+            return response.data.Products;
         } catch (error) {
             this.handleError(error, 'Failed to retrieve products');
-            return []; // Ensure return type consistency
+            return [];
         }
     }
 
@@ -133,50 +195,25 @@ class ProductService {
 
             const products = productsResponse;
             const categories = categoriesResponse.data.ProductCategory;
-
             const categoryMap = new Map(categories.map(cat => [cat.id, cat.name]));
 
-            const productsWithCategories = products.map(product => ({
+            return products.map(product => ({
                 ...product,
                 category_name: categoryMap.get(product.product_category_id) || '',
             }));
-            console.log('log',productsResponse);
-            
-
-            return productsWithCategories;
         } catch (error) {
             this.handleError(error, 'Failed to retrieve products with categories');
-            return []; // Ensure return type consistency
+            return [];
         }
     }
 
-    // Helper function to get category name from ID
-    private async getCategoryName(categoryId: string): Promise<string> {
-        try {
-            const response = await this.axiosInstance.get<{ ProductCategory: ProductCategory[] }>('/product-category');
-            const categories = response.data.ProductCategory;
-            const category = categories.find(cat => cat.id === categoryId);
-            return category ? category.name : ''; // Return category name or empty string if not found
-        } catch (error) {
-            throw new Error('Failed to fetch categories');
-        }
-    }
-
-    // Centralized error handling
-    private handleError(error: unknown, message: string) {
-        if (error instanceof AxiosError) {
-            console.error(`${message}:`, error.response?.data);
-            throw error.response?.data || { error: message };
-        }
-        console.error(message, error);
-        throw { error: message };
-    }
     async getProductById(id: string): Promise<Product | undefined> {
         try {
-            const response = await this.axiosInstance.get<{ Product: Product }>(`/product/${id}`);
+            const response = await this.axiosInstance.get<{
+                Product: Product;
+            }>(`/product/${id}`);
             const product = response.data.Product;
             
-            // Get category name if product exists
             if (product && product.product_category_id) {
                 const categoryName = await this.getCategoryName(product.product_category_id);
                 return {
@@ -190,6 +227,28 @@ class ProductService {
             this.handleError(error, 'Failed to retrieve product details');
             return undefined;
         }
+    }
+
+    private async getCategoryName(categoryId: string): Promise<string> {
+        try {
+            const response = await this.axiosInstance.get<{
+                ProductCategory: ProductCategory[];
+            }>('/product-category');
+            const categories = response.data.ProductCategory;
+            const category = categories.find(cat => cat.id === categoryId);
+            return category ? category.name : '';
+        } catch (error) {
+            throw new Error('Failed to fetch categories');
+        }
+    }
+
+    private handleError(error: unknown, message: string) {
+        if (error instanceof AxiosError) {
+            console.error(`${message}:`, error.response?.data);
+            throw error.response?.data || { error: message };
+        }
+        console.error(message, error);
+        throw { error: message };
     }
 }
 

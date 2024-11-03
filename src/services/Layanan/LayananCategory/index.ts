@@ -71,18 +71,18 @@ class LayananCategoryService {
         }
     }
 
-async getAllServiceCategories(): Promise<ServiceCategory[]> {
-  try {
-    const response = await this.axiosInstance.get('/service-category');
-    console.log('Response data:', response.data); // Log the entire response data
+    async getAllServiceCategories(): Promise<ServiceCategory[]> {
+    try {
+        const response = await this.axiosInstance.get('/service-category');
+        console.log('Response data:', response.data); // Log the entire response data
 
-    return response.data; // Assuming this is where the data should be
-  } catch (error) {
-    console.error('Error in getAllServiceCategories:', error);
-    this.handleError(error, 'Failed to retrieve service categories');
-    return [];
-  }
-}
+        return response.data; // Assuming this is where the data should be
+    } catch (error) {
+        console.error('Error in getAllServiceCategories:', error);
+        this.handleError(error, 'Failed to retrieve service categories');
+        return [];
+    }
+    }
 
 
     // Centralized error handling

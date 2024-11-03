@@ -27,6 +27,7 @@ import ProtectedRoute from './services/Protected/ProtectedRoute';
 import UnauthorizedPage from './services/Protected/Unauthorized';
 import DasboardServiceCategoryPage from './pages/Dashboard/Layanan/Layanan-Category';
 import DashboardServicePage from './pages/Dashboard/Layanan/LayananList';
+import ProductDetail from './component/includes/product/Detail';
 
 
 function App() {
@@ -71,6 +72,7 @@ function App() {
         <Route path="/layanan/wisata-edukasi" element={<WisataEdukasi />} />
         <Route path="/layanan/pelatihan-workshop" element={<PelatihanWorkshop />} />
         <Route path="/layanan/produk-layanan" element={<ProductLayanan />} />
+        <Route path="/layanan/produk-layanan/:id" element={<ProductDetail />} />
 
         <Route 
           path="/dashboard" 
