@@ -191,35 +191,34 @@ const DashboardProduct = () => {
     if (!editingProduct) return;
 
     try {
-        const updateData: UpdateProductData = {
-            id: editingProduct.id,
-            ...formData,
-            product_category_id: formData.product_category_id || undefined,
-        };
+      const updateData: UpdateProductData = {
+        id: editingProduct.id,
+        ...formData,
+        product_category_id: formData.product_category_id || undefined,
+      };
 
-        if (selectedFile) {
-            updateData.image = selectedFile; // Ensure selectedFile is a File object
-        }
+      if (selectedFile) {
+        updateData.image = selectedFile; // Ensure selectedFile is a File object
+      }
 
-        await productService.updateProduct(updateData);
-        resetForm();
-        setIsModalOpen(false);
-        await fetchInitialData();
-
+      await productService.updateProduct(updateData);
+      resetForm();
+      setIsModalOpen(false);
+      await fetchInitialData();
     } catch (err) {
-        let errorMessage = "Failed to update product.";
-        if (err instanceof Error) {
-            if (err.message.includes("Conflict")) {
-                errorMessage = "Conflict with existing product data. Please try again.";
-            } else {
-                errorMessage = err.message;
-            }
+      let errorMessage = "Failed to update product.";
+      if (err instanceof Error) {
+        if (err.message.includes("Conflict")) {
+          errorMessage =
+            "Conflict with existing product data. Please try again.";
+        } else {
+          errorMessage = err.message;
         }
-        setError(errorMessage);
-        alert(errorMessage);
+      }
+      setError(errorMessage);
+      alert(errorMessage);
     }
-};
-
+  };
 
   const handleDeleteProduct = async (productId: string) => {
     const confirmDelete = window.confirm(
@@ -364,16 +363,15 @@ const DashboardProduct = () => {
                 </tbody>
               </table>
             </div>
-
             {isModalOpen && (
               <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-                <div className="bg-white rounded-lg p-6 max-w-4xl mx-auto max-h-[90vh] overflow-y-auto">
-                  <h2 className="text-xl font-bold mb-4">
+                <div className="bg-white rounded-lg p-6 max-w-[90vw] sm:max-w-4xl mx-auto max-h-[90vh] overflow-y-auto">
+                  <h2 className="text-lg sm:text-xl font-bold mb-4">
                     {editingProduct ? "Edit Product" : "Add Product"}
                   </h2>
 
                   {/* Basic Information */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="mb-4">
                       <label className="block text-gray-700">
                         Product Name
@@ -399,7 +397,7 @@ const DashboardProduct = () => {
                   </div>
 
                   {/* Additional Fields */}
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="mb-4">
                       <label className="block text-gray-700">Synonym</label>
                       <input
@@ -422,7 +420,7 @@ const DashboardProduct = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="mb-4">
                       <label className="block text-gray-700">Part Used</label>
                       <input
@@ -447,53 +445,8 @@ const DashboardProduct = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="mb-4">
-                      <label className="block text-gray-700">Harvest Age</label>
-                      <input
-                        type="text"
-                        name="harvest_age"
-                        value={formData.harvest_age}
-                        onChange={handleInputChange}
-                        className="border rounded-lg w-full p-2"
-                      />
-                    </div>
-                    <div className="mb-4">
-                      <label className="block text-gray-700">Area Name</label>
-                      <input
-                        type="text"
-                        name="area_name"
-                        value={formData.area_name}
-                        onChange={handleInputChange}
-                        className="border rounded-lg w-full p-2"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Detailed Information */}
-                  <div className="mb-4">
-                    <label className="block text-gray-700">Morphology</label>
-                    <textarea
-                      name="morphology"
-                      value={formData.morphology}
-                      onChange={handleInputChange}
-                      className="border rounded-lg w-full p-2"
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="block text-gray-700">Efficacy</label>
-                    <textarea
-                      name="efficacy"
-                      value={formData.efficacy}
-                      onChange={handleInputChange}
-                      className="border rounded-lg w-full p-2"
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
+                  {/* Other Fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <ArrayInput
                       label="Utilization"
                       value={formData.utilization}
@@ -518,32 +471,8 @@ const DashboardProduct = () => {
                     />
                   </div>
 
-                  <div className="mb-4">
-                    <label className="block text-gray-700">
-                      Research Results
-                    </label>
-                    <textarea
-                      name="research_results"
-                      value={formData.research_results}
-                      onChange={handleInputChange}
-                      className="border rounded-lg w-full p-2"
-                      rows={3}
-                    />
-                  </div>
-
-                  <div className="mb-4">
-                    <label className="block text-gray-700">Description</label>
-                    <textarea
-                      name="description"
-                      value={formData.description}
-                      onChange={handleInputChange}
-                      className="border rounded-lg w-full p-2"
-                      rows={3}
-                    />
-                  </div>
-
                   {/* Price and Category Section */}
-                  <div className="grid grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div className="mb-4">
                       <label className="block text-gray-700">Price</label>
                       <input
@@ -581,29 +510,9 @@ const DashboardProduct = () => {
                       </select>
                     </div>
                   </div>
-                  <div className="mb-4">
-                    <label className="block text-gray-700">Product Image</label>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="border rounded-lg w-full p-2"
-                    />
-                    {editingProduct &&
-                      editingProduct.image_url &&
-                      !selectedFile && (
-                        <div className="mt-2">
-                          <img
-                            src={`http://localhost:5000/${editingProduct.image_url}`}
-                            alt="Current product"
-                            className="h-20 w-20 object-cover rounded"
-                          />
-                        </div>
-                      )}
-                  </div>
 
                   {/* Action Buttons */}
-                  <div className="flex justify-end space-x-4 mt-6">
+                  <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 mt-6">
                     <button
                       onClick={() => {
                         setIsModalOpen(false);

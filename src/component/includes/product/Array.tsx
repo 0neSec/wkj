@@ -44,14 +44,14 @@ const ArrayInput: React.FC<ArrayInputProps> = ({
     <div className="mb-4">
       <label className="block text-gray-700 mb-2">{label}</label>
       <div className="space-y-2">
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             value={inputValue}
             onChange={handleInputChange}
             onKeyPress={handleKeyPress}
             placeholder={placeholder}
-            className="border rounded-lg flex-1 p-2"
+            className="border rounded-lg p-2 flex-1"
           />
           <button
             type="button"
@@ -68,7 +68,7 @@ const ArrayInput: React.FC<ArrayInputProps> = ({
               key={index}
               className="flex items-center gap-2 p-2 bg-gray-50 rounded-lg"
             >
-              <span className="flex-1">{item}</span>
+              <span className="flex-1 break-words">{item}</span>
               <button
                 type="button"
                 onClick={() => handleRemove(index)}

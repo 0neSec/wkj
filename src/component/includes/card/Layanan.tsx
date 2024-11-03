@@ -80,7 +80,7 @@ const ServiceGrid = () => {
       {services.map((service) => (
         <Link 
           key={service.id} 
-          to={`/services/${service.href}`}
+          to={`/layanan/${service.href}`}
           className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
         >
           <div className="flex items-start gap-4">

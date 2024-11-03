@@ -71,18 +71,18 @@ class AuthService {
       if (!this.validateEmail(data.email)) {
         throw new Error('Invalid email format');
       }
-      
+
       if (!this.validatePassword(data.password)) {
         throw new Error('Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, one number, and one special character');
       }
 
       const response = await this.axiosInstance.post<AuthResponse>('/register', data);
-      
+
       if (response.data.token) {
         this.setAuthData(response.data);
         this.setupTokenRefresh(response.data.token);
       }
-      
+
       return response.data;
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -99,12 +99,12 @@ class AuthService {
       }
 
       const response = await this.axiosInstance.post<AuthResponse>('/login', data);
-      
+
       if (response.data.token) {
         this.setAuthData(response.data, data.rememberMe);
         this.setupTokenRefresh(response.data.token);
       }
-      
+
       return response.data;
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -130,7 +130,7 @@ class AuthService {
 
   private setAuthData(data: AuthResponse, rememberMe: boolean = false): void {
     const storage = rememberMe ? localStorage : sessionStorage;
-    const expiresAt = Date.now() + 30 * 60 * 1000; // Set expiration time to 30 minutes
+    const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // Set expiration time to 1 day (24 hours)
     storage.setItem('token', data.token);
     storage.setItem('username', data.username);
     storage.setItem('role', data.role);
@@ -138,25 +138,26 @@ class AuthService {
     storage.setItem('expiresAt', expiresAt.toString());
     storage.setItem('storageType', rememberMe ? 'local' : 'session');
 
-    // Set a timeout to clear localStorage after 30 minutes
+    // Set a timeout to clear localStorage after 1 day
     if (rememberMe) {
       setTimeout(() => {
-        this.clearAuthData(); // Clear data after 30 minutes
-      }, 30 * 60 * 1000); // 30 minutes in milliseconds
+        this.clearAuthData(); // Clear data after 1 day
+      }, 24 * 60 * 60 * 1000); // 1 day in milliseconds
     }
   }
+
 
   private clearAuthData(): void {
     const storageType = localStorage.getItem('storageType');
     const storage = storageType === 'local' ? localStorage : sessionStorage;
-    
+
     storage.removeItem('token');
     storage.removeItem('username');
     storage.removeItem('role');
     storage.removeItem('email');
     storage.removeItem('expiresAt'); // Clear expiresAt on logout
     storage.removeItem('storageType');
-    
+
     // Clear from both storages to ensure complete logout
     localStorage.clear();
     sessionStorage.clear();
@@ -165,7 +166,7 @@ class AuthService {
   getAuthState(): AuthState {
     const storageType = localStorage.getItem('storageType');
     const storage = storageType === 'local' ? localStorage : sessionStorage;
-    
+
     const expiresAt = parseInt(storage.getItem('expiresAt') || '0', 10);
     const isAuthenticated = !!storage.getItem('token') && Date.now() < expiresAt;
 
@@ -206,11 +207,11 @@ class AuthService {
     try {
       const decoded = this.decodeToken(token);
       const expiresIn = decoded.exp * 1000 - Date.now();
-      
+
       if (this.refreshTokenTimeout) {
         clearTimeout(this.refreshTokenTimeout);
       }
-  
+
       if (expiresIn > TOKEN_REFRESH_THRESHOLD) {
         this.refreshTokenTimeout = setTimeout(
           () => this.refreshToken(),
@@ -241,10 +242,10 @@ class AuthService {
     // Request interceptor
     this.axiosInstance.interceptors.request.use(
       (config) => {
-        const token = this.getAuthState().isAuthenticated ? 
-          (localStorage.getItem('token') || sessionStorage.getItem('token')) : 
+        const token = this.getAuthState().isAuthenticated ?
+          (localStorage.getItem('token') || sessionStorage.getItem('token')) :
           null;
-          
+
         if (token && config.headers) {
           config.headers.Authorization = `Bearer ${token}`;
         }
