@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronRight, Loader2 } from 'lucide-react';
-import { ProductCategory, productCategoryService } from '../../../services/product/product-category.service';
+import React, { useState, useEffect } from "react";
+import { ChevronRight, Loader2 } from "lucide-react";
+import {
+  ProductCategory,
+  productCategoryService,
+} from "../../../services/product/product-category.service";
 
 interface CategorySidebarProps {
   selectedCategoryId: string | null;
@@ -11,7 +14,7 @@ interface CategorySidebarProps {
 const CategorySidebar: React.FC<CategorySidebarProps> = ({
   selectedCategoryId,
   onCategorySelect,
-  className = ''
+  className = "",
 }) => {
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -23,12 +26,11 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
       try {
         setLoading(true);
         const data = await productCategoryService.getAllCategories();
-        setCategories(data);
         console.log(data);
-        
+        setCategories(data);
       } catch (err) {
-        setError('Failed to load categories');
-        console.error('Error fetching categories:', err);
+        setError("Failed to load categories");
+        console.error("Error fetching categories:", err);
       } finally {
         setLoading(false);
       }
@@ -70,14 +72,14 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
           <span className="font-semibold">Categories</span>
           <ChevronRight
             className={`w-5 h-5 transition-transform ${
-              isCollapsed ? '' : 'rotate-90'
+              isCollapsed ? "" : "rotate-90"
             }`}
           />
         </button>
       </div>
 
       {/* Category List */}
-      <div className={`${isCollapsed ? 'hidden' : 'block'} lg:block`}>
+      <div className={`${isCollapsed ? "hidden" : "block"} lg:block`}>
         <div className="p-4">
           <h2 className="text-lg font-semibold mb-4 hidden lg:block">
             Categories
@@ -87,8 +89,8 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
               onClick={() => onCategorySelect(null)}
               className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
                 selectedCategoryId === null
-                  ? 'bg-blue-100 text-blue-700'
-                  : 'hover:bg-gray-100'
+                  ? "bg-blue-100 text-blue-700"
+                  : "hover:bg-gray-100"
               }`}
             >
               All Products
@@ -96,11 +98,11 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
             {categories.map((category) => (
               <button
                 key={category.id}
-                onClick={() => onCategorySelect(category.id)}
+                onClick={() => onCategorySelect(category.id.toString())} // Convert to string
                 className={`w-full text-left px-3 py-2 rounded-lg transition-colors ${
-                  selectedCategoryId === category.id
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'hover:bg-gray-100'
+                  selectedCategoryId === category.id.toString() // Convert to string for comparison
+                    ? "bg-blue-100 text-blue-700"
+                    : "hover:bg-gray-100"
                 }`}
               >
                 {category.name}

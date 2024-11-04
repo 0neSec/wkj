@@ -21,7 +21,6 @@ const DashboardProduct = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<CreateProductData>>({
     name: "",
     latin_name: "",
@@ -37,7 +36,7 @@ const DashboardProduct = () => {
     description: "",
     price: 0,
     unit_type: "",
-    product_category_id: "",
+    product_category_id: 0,
     utilization: [],
     composition: [],
   });
@@ -103,12 +102,7 @@ const DashboardProduct = () => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      const file = event.target.files[0];
-      setSelectedFile(file);
-      
-      // Create preview URL
-      const previewUrl = URL.createObjectURL(file);
-      setImagePreview(previewUrl);
+      setSelectedFile(event.target.files[0]);
     }
   };
 
@@ -120,7 +114,10 @@ const DashboardProduct = () => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: name === "price" ? parseFloat(value) || 0 : value,
+      [name]:
+        name === "price" || name === "product_category_id"
+          ? parseFloat(value) || 0
+          : value,
     }));
   };
 
@@ -157,12 +154,11 @@ const DashboardProduct = () => {
       description: "",
       price: 0,
       unit_type: "",
-      product_category_id: "",
+      product_category_id: 0,
       utilization: [],
       composition: [],
     });
     setSelectedFile(null);
-    setImagePreview(null);
     setEditingProduct(null);
   };
 
@@ -176,11 +172,16 @@ const DashboardProduct = () => {
       return;
     }
     try {
+      console.log(formData.product_category_id);
+      console.log(formData.utilization);
+      
+
       const createData = {
         ...formData,
         image: selectedFile,
-        product_category_id: formData.product_category_id || undefined,
+        product_category_id: formData.product_category_id,
       } as CreateProductData;
+      console.log("data:", createData);
 
       await productService.createProduct(createData);
       resetForm();
@@ -204,7 +205,7 @@ const DashboardProduct = () => {
       };
 
       if (selectedFile) {
-        updateData.image = selectedFile;
+        updateData.image = selectedFile; 
       }
 
       await productService.updateProduct(updateData);
@@ -260,16 +261,20 @@ const DashboardProduct = () => {
       price: product.price,
       unit_type: product.unit_type,
       product_category_id: product.product_category_id,
-      utilization: product.utilization || [],
-      composition: product.composition || [],
+      utilization: [],
+      composition: [],
     });
-    setImagePreview(product.image_url || null);
     setIsModalOpen(true);
   };
 
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const renderCategoryOptions = () => {
+    if (!Array.isArray(categories)) {
+      return <option value="">No categories available</option>;
+    }
+  };
 
   if (loading)
     return (
@@ -284,7 +289,6 @@ const DashboardProduct = () => {
         {error}
       </div>
     );
-
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <Navbar />
@@ -320,7 +324,6 @@ const DashboardProduct = () => {
                 <thead className="bg-gray-100">
                   <tr>
                     <th className="px-4 py-3 text-left">ID</th>
-                    <th className="px-4 py-3 text-left">Image</th>
                     <th className="px-4 py-3 text-left">Name</th>
                     <th className="px-4 py-3 text-left">Latin Name</th>
                     <th className="px-4 py-3 text-left">Price</th>
@@ -332,15 +335,6 @@ const DashboardProduct = () => {
                   {filteredProducts.map((product) => (
                     <tr key={product.id} className="border-b hover:bg-gray-50">
                       <td className="px-4 py-3">{product.id}</td>
-                      <td className="px-4 py-3">
-                        {product.image_url && (
-                          <img
-                            src={product.image_url}
-                            alt={product.name}
-                            className="w-16 h-16 object-cover rounded"
-                          />
-                        )}
-                      </td>
                       <td className="px-4 py-3">{product.name}</td>
                       <td className="px-4 py-3">{product.latin_name}</td>
                       <td className="px-4 py-3">
@@ -366,7 +360,7 @@ const DashboardProduct = () => {
                   {filteredProducts.length === 0 && (
                     <tr>
                       <td
-                        colSpan={7}
+                        colSpan={6}
                         className="px-4 py-3 text-center text-gray-500"
                       >
                         No products found
@@ -379,52 +373,13 @@ const DashboardProduct = () => {
 
             {isModalOpen && (
               <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-                <div className="bg-white rounded-lg p-6 max-w-[90vw] sm:max-w-4xl mx-auto max-h-[90vh] overflow-y-auto">
-                  <h2 className="text-lg sm:text-xl font-bold mb-4">
+                <div className="bg-white rounded-lg p-6 max-w-4xl mx-auto max-h-[90vh] overflow-y-auto">
+                  <h2 className="text-xl font-bold mb-4">
                     {editingProduct ? "Edit Product" : "Add Product"}
                   </h2>
 
-                  {/* Image Upload Section */}
-                  <div className="mb-6">
-                    <label className="block text-gray-700 mb-2">Product Image</label>
-                    <div className="flex flex-col sm:flex-row items-center gap-4">
-                      <div className="w-full sm:w-1/3">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleFileChange}
-                          className="border rounded-lg w-full p-2"
-                        />
-                      </div>
-                      {imagePreview && (
-                        <div className="w-full sm:w-1/3">
-                          <img
-                            src={imagePreview}
-                            alt="Preview"
-                            className="w-full h-32 object-cover rounded-lg"
-                          />
-                        </div>
-                      )}
-                      {editingProduct && editingProduct.image_url && !imagePreview && (
-                        <div className="w-full sm:w-1/3">
-                          <img
-                            src={editingProduct.image_url}
-                            alt="Current"
-                            className="w-full h-32 object-cover rounded-lg"
-                          />
-                          <p className="text-sm text-gray-500 mt-1">Current image</p>
-                        </div>
-                      )}
-                    </div>
-                    {!selectedFile && !editingProduct && (
-                      <p className="text-sm text-red-500 mt-1">
-                        Please select an image for the product
-                      </p>
-                    )}
-                  </div>
-
                   {/* Basic Information */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="mb-4">
                       <label className="block text-gray-700">
                         Product Name
@@ -438,7 +393,7 @@ const DashboardProduct = () => {
                       />
                     </div>
                     <div className="mb-4">
-                    <label className="block text-gray-700">Latin Name</label>
+                      <label className="block text-gray-700">Latin Name</label>
                       <input
                         type="text"
                         name="latin_name"
@@ -450,7 +405,7 @@ const DashboardProduct = () => {
                   </div>
 
                   {/* Additional Fields */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="mb-4">
                       <label className="block text-gray-700">Synonym</label>
                       <input
@@ -473,7 +428,7 @@ const DashboardProduct = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="mb-4">
                       <label className="block text-gray-700">Part Used</label>
                       <input
@@ -498,7 +453,7 @@ const DashboardProduct = () => {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="mb-4">
                       <label className="block text-gray-700">Harvest Age</label>
                       <input
@@ -510,19 +465,6 @@ const DashboardProduct = () => {
                       />
                     </div>
                     <div className="mb-4">
-                      <label className="block text-gray-700">Morphology</label>
-                      <input
-                        type="text"
-                        name="morphology"
-                        value={formData.morphology}
-                        onChange={handleInputChange}
-                        className="border rounded-lg w-full p-2"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="mb-4">
                       <label className="block text-gray-700">Area Name</label>
                       <input
                         type="text"
@@ -532,42 +474,32 @@ const DashboardProduct = () => {
                         className="border rounded-lg w-full p-2"
                       />
                     </div>
-                    <div className="mb-4">
-                      <label className="block text-gray-700">Efficacy</label>
-                      <input
-                        type="text"
-                        name="efficacy"
-                        value={formData.efficacy}
-                        onChange={handleInputChange}
-                        className="border rounded-lg w-full p-2"
-                      />
-                    </div>
                   </div>
 
-                  {/* Research Results & Description */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="mb-4">
-                      <label className="block text-gray-700">Research Results</label>
-                      <textarea
-                        name="research_results"
-                        value={formData.research_results}
-                        onChange={handleInputChange}
-                        className="border rounded-lg w-full p-2 h-32"
-                      />
-                    </div>
-                    <div className="mb-4">
-                      <label className="block text-gray-700">Description</label>
-                      <textarea
-                        name="description"
-                        value={formData.description}
-                        onChange={handleInputChange}
-                        className="border rounded-lg w-full p-2 h-32"
-                      />
-                    </div>
+                  {/* Detailed Information */}
+                  <div className="mb-4">
+                    <label className="block text-gray-700">Morphology</label>
+                    <textarea
+                      name="morphology"
+                      value={formData.morphology}
+                      onChange={handleInputChange}
+                      className="border rounded-lg w-full p-2"
+                      rows={3}
+                    />
                   </div>
 
-                  {/* Array Inputs */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="mb-4">
+                    <label className="block text-gray-700">Efficacy</label>
+                    <textarea
+                      name="efficacy"
+                      value={formData.efficacy}
+                      onChange={handleInputChange}
+                      className="border rounded-lg w-full p-2"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
                     <ArrayInput
                       label="Utilization"
                       value={formData.utilization}
@@ -592,8 +524,32 @@ const DashboardProduct = () => {
                     />
                   </div>
 
+                  <div className="mb-4">
+                    <label className="block text-gray-700">
+                      Research Results
+                    </label>
+                    <textarea
+                      name="research_results"
+                      value={formData.research_results}
+                      onChange={handleInputChange}
+                      className="border rounded-lg w-full p-2"
+                      rows={3}
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="block text-gray-700">Description</label>
+                    <textarea
+                      name="description"
+                      value={formData.description}
+                      onChange={handleInputChange}
+                      className="border rounded-lg w-full p-2"
+                      rows={3}
+                    />
+                  </div>
+
                   {/* Price and Category Section */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-3 gap-4">
                     <div className="mb-4">
                       <label className="block text-gray-700">Price</label>
                       <input
@@ -631,9 +587,29 @@ const DashboardProduct = () => {
                       </select>
                     </div>
                   </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700">Product Image</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="border rounded-lg w-full p-2"
+                    />
+                    {editingProduct &&
+                      editingProduct.image_url &&
+                      !selectedFile && (
+                        <div className="mt-2">
+                          <img
+                            src={`http://localhost:5000/${editingProduct.image_url}`}
+                            alt="Current product"
+                            className="h-20 w-20 object-cover rounded"
+                          />
+                        </div>
+                      )}
+                  </div>
 
                   {/* Action Buttons */}
-                  <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4 mt-6">
+                  <div className="flex justify-end space-x-4 mt-6">
                     <button
                       onClick={() => {
                         setIsModalOpen(false);

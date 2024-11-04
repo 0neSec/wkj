@@ -142,6 +142,14 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/dashboard/content/tugas-fungsi"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <DashboardProfile />
+            </ProtectedRoute>
+          }
+        />
 
         {/* Unauthorized page (optional) */}
         <Route path="/unauthorized" element={<UnauthorizedPage />} />

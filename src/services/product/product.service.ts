@@ -21,7 +21,7 @@ export interface Product {
     description: string;
     price: number;
     unit_type: string;
-    product_category_id: string;
+    product_category_id: number; // Changed from string to number
     product_category?: ProductCategory;
     category_name?: string;
     created_at: string;
@@ -30,24 +30,24 @@ export interface Product {
 }
 
 export interface CreateProductData {
-    name: string;
-    latin_name: string;
-    synonym: string;
-    familia: string;
-    part_used: string;
-    method_of_reproduction: string;
-    harvest_age: string;
-    morphology: string;
-    area_name: string;
-    efficacy: string;
+    name?: string;
+    latin_name?: string;
+    synonym?: string;
+    familia?: string;
+    part_used?: string;
+    method_of_reproduction?: string;
+    harvest_age?: string;
+    morphology?: string;
+    area_name?: string;
+    efficacy?: string;
     utilization?: string[];
     composition?: string[];
-    image: File;
-    research_results: string;
-    description: string;
-    price: number;
-    unit_type: string;
-    product_category_id: string;
+    image?: File;
+    research_results?: string;
+    description?: string;
+    price?: number;
+    unit_type?: string;
+    product_category_id?: number; // Changed from string to number
 }
 
 export interface UpdateProductData {
@@ -69,7 +69,7 @@ export interface UpdateProductData {
     description?: string;
     price?: number;
     unit_type?: string;
-    product_category_id?: string;
+    product_category_id?: number; // Changed from string to number
 }
 
 class ProductService {
@@ -89,33 +89,47 @@ class ProductService {
         });
     }
 
-    async createProduct(data: CreateProductData): Promise<Product | undefined> {
-        try {
-            const formData = new FormData();
-            Object.entries(data).forEach(([key, value]) => {
-                if (key === 'utilization' || key === 'composition') {
-                    if (value) {
-                        formData.append(key, JSON.stringify({ values: value }));
-                    }
-                } else if (key === 'image') {
-                    formData.append('image_url', value);
-                } else if (value !== undefined && value !== null) {
-                    formData.append(key, value.toString());
-                }
-            });
+async createProduct(data: CreateProductData): Promise<Product | undefined> {
+    try {
+        const productData = {
+            name: data.name,
+            latin_name: data.latin_name,
+            synonym: data.synonym,
+            familia: data.familia,
+            part_used: data.part_used,
+            method_of_reproduction: data.method_of_reproduction,
+            harvest_age: data.harvest_age,
+            morphology: data.morphology,
+            area_name: data.area_name,
+            efficacy: data.efficacy,
+            utilization: JSON.stringify(data.utilization || []), // Ensure utilization is a JSON string
+            composition: JSON.stringify({
+                primary: data.composition?.[0] || '',
+                secondary: data.composition?.[1] || ''
+            }), // Create composition as a JSON object
+            image_url: null, // Set image_url to null or adjust based on your requirements
+            research_results: data.research_results,
+            description: data.description,
+            price: data.price,
+            unit_type: data.unit_type,
+            product_category_id: data.product_category_id,
+        };
 
-            const response = await this.axiosInstance.post<{
-                message: string;
-                Product: Product;
-            }>('/admin/product', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-            return response.data.Product;
-        } catch (error) {
-            this.handleError(error, 'Failed to create product');
-            return undefined;
-        }
+        const response = await this.axiosInstance.post<{
+            message: string;
+            Product: Product;
+        }>('/admin/product', productData, {
+            headers: { 'Content-Type': 'application/json' },
+        });
+        console.log('Product created:', response);
+
+        return response.data.Product;
+    } catch (error) {
+        this.handleError(error, 'Failed to create product');
+        return undefined;
     }
+}
+
 
     async getProduct(id: string): Promise<Product | undefined> {
         try {
@@ -154,17 +168,13 @@ class ProductService {
             return response.data.Product;
     
         } catch (error) {
-            // Check if error is AxiosError with 409 (conflict)
-            if (error instanceof AxiosError) {
-                if (error.response?.status === 409) {
-                    throw new Error("Conflict: A product with this data already exists.");
-                }
+            if (error instanceof AxiosError && error.response?.status === 409) {
+                throw new Error("Conflict: A product with this data already exists.");
             }
             this.handleError(error, 'Failed to update product');
             return undefined;
         }
     }
-    
 
     async deleteProduct(id: string): Promise<void> {
         try {
@@ -229,7 +239,7 @@ class ProductService {
         }
     }
 
-    private async getCategoryName(categoryId: string): Promise<string> {
+    private async getCategoryName(categoryId: number): Promise<string> {
         try {
             const response = await this.axiosInstance.get<{
                 ProductCategory: ProductCategory[];

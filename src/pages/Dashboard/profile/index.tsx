@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { CreateProfileData, ProfileContent, profileService, UpdateProfileData } from "../../../services/Tentang";
+import { CreateProfileData, ProfileContent, profileService, UpdateProfileData } from "../../../services/Tentang/TentangService";
 import Navbar from "../../../component/includes/navbar";
 import Sidebar from "../../../component/includes/sidebar";
-import { userFriendlyMessages } from "../../../types/profile";
+import { userTentangMessages } from "../../../types/massage";
 
 const DashboardProfile = () => {
   const [profiles, setProfiles] = useState<ProfileContent[]>([]);
@@ -26,7 +26,7 @@ const DashboardProfile = () => {
       const response = await profileService.getProfile();
       setProfiles(response);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : userFriendlyMessages.LOAD_FAILED;
+      const errorMessage = err instanceof Error ? err.message : userTentangMessages.LOAD_FAILED;
       setError(errorMessage);
       setIsErrorModalOpen(true);
       console.error('Error fetching profiles:', err);
@@ -47,7 +47,7 @@ const DashboardProfile = () => {
 
   const handleCreateProfile = async () => {
     if (!newProfile.description.trim()) {
-      setError(userFriendlyMessages.EMPTY_DESCRIPTION);
+      setError(userTentangMessages.EMPTY_DESCRIPTION);
       setIsErrorModalOpen(true);
       return;
     }
@@ -55,12 +55,12 @@ const DashboardProfile = () => {
     try {
       await profileService.createProfile(newProfile);
       await fetchProfiles();
-      setSuccessMessage(userFriendlyMessages.CREATE_SUCCESS);
+      setSuccessMessage(userTentangMessages.CREATE_SUCCESS);
       setIsSuccessModalOpen(true);
       setNewProfile({ description: "" });
       setIsModalOpen(false);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : userFriendlyMessages.CREATE_FAILED;
+      const errorMessage = err instanceof Error ? err.message : userTentangMessages.CREATE_FAILED;
       setError(errorMessage);
       setIsErrorModalOpen(true);
       console.error('Error creating profile:', err);
@@ -77,12 +77,12 @@ const DashboardProfile = () => {
       };
       await profileService.updateProfile(updatedData);
       await fetchProfiles();
-      setSuccessMessage(userFriendlyMessages.UPDATE_SUCCESS);
+      setSuccessMessage(userTentangMessages.UPDATE_SUCCESS);
       setIsSuccessModalOpen(true);
       setEditingProfile(null);
       setIsModalOpen(false);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : userFriendlyMessages.UPDATE_FAILED;
+      const errorMessage = err instanceof Error ? err.message : userTentangMessages.UPDATE_FAILED;
       setError(errorMessage);
       setIsErrorModalOpen(true);
       console.error('Error updating profile:', err);
@@ -95,10 +95,10 @@ const DashboardProfile = () => {
       try {
         await profileService.deleteProfile(profileId);
         await fetchProfiles();
-        setSuccessMessage(userFriendlyMessages.DELETE_SUCCESS);
+        setSuccessMessage(userTentangMessages.DELETE_SUCCESS);
         setIsSuccessModalOpen(true);
       } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : userFriendlyMessages.DELETE_FAILED;
+        const errorMessage = err instanceof Error ? err.message : userTentangMessages.DELETE_FAILED;
         setError(errorMessage);
         setIsErrorModalOpen(true);
         console.error('Error deleting profile:', err);

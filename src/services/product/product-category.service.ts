@@ -2,9 +2,11 @@ import axios, { AxiosError, AxiosInstance } from 'axios';
 
 // Common types
 export interface ProductCategory {
-  id: string;
+  id: number;
   name: string;
 }
+
+// Data transfer types
 export interface CreateCategoryData {
   name: string;
 }

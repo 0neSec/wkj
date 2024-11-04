@@ -4,8 +4,8 @@ import Footer from "../component/includes/footer";
 import Blog from "../component/includes/artikel";
 import Faq from "../component/particle/faq";
 import HeroBanner from "../component/includes/banner";
-import { ProductGrid  } from "../component/includes/product";
 import ServiceGrid from "../component/includes/card/Layanan";
+import ProductPage from "../component/includes/product";
 
 function Home() {
   return (
@@ -23,12 +23,7 @@ function Home() {
                 Temukan produk herbal terbaik untuk kesehatan Anda
               </p>
               <div className="p-10">
-                <ProductGrid
-                  showSearch={false}
-                  // showCategories={false}
-                  maxItems={8} // Optional: limit number of items shown
-                  showSort={false}
-                />
+              <ProductPage showSearchAndFilter={false} />
               </div>
             </div>
           </div>

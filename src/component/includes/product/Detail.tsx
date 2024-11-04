@@ -183,11 +183,11 @@ const ProductDetail: React.FC = () => {
             </div>
 
             <div className="md:w-1/2 p-8">
-              <div className="mb-2">
+              {/* <div className="mb-2">
                 <span className="px-2 py-1 text-sm font-medium bg-blue-100 text-blue-800 rounded-full">
                   {product.product_category_id}
                 </span>
-              </div>
+              </div> */}
 
               <h1 className="text-3xl font-bold text-gray-900 mb-4">
                 {product.name}

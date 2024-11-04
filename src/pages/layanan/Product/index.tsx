@@ -1,7 +1,8 @@
 import React from "react";
 import Navbar from "../../../component/includes/navbar";
 import Footer from "../../../component/includes/footer";
-import { ProductGrid } from "../../../component/includes/product";
+import ProductPage from "../../../component/includes/product";
+
 
 function ProductLayanan() {
   return (
@@ -20,12 +21,7 @@ function ProductLayanan() {
             </div>
 
             <div className="mt-4 sm:mt-6 lg:mt-8">
-              <ProductGrid
-                showSearch={true}
-                // showCategories={true}
-                showPagination={true}
-                className="max-w-full"
-              />
+            <ProductPage showSearchAndFilter={true} />
             </div>
           </div>
         </div>

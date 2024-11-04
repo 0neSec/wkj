@@ -1,187 +1,228 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import {
+  Product,
+  productService,
+} from "../../../services/product/product.service";
 import { Search } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { Product } from "../../../services/product/product.service";
 
-interface ProductGridProps {
-  showSearch?: boolean;
-  maxItems?: number;
-  showSort?: boolean;
-  showPagination?: boolean;
-  className?: string;
-  itemsPerPage?: number;
+interface ProductPageProps {
+  showSearchAndFilter?: boolean;
 }
 
-export const ProductGrid: React.FC<ProductGridProps> = ({
-  showSearch = true,
-  maxItems,
-  showSort = true,
-  showPagination = false,
-  itemsPerPage = 20,
-  className = "",
+const ProductPage: React.FC<ProductPageProps> = ({
+  showSearchAndFilter = true,
 }) => {
-  const navigate = useNavigate();
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [sortBy, setSortBy] = useState<"price-low" | "price-high">("price-low");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState<string>("name");
+  const [categories, setCategories] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+    const fetchProducts = async () => {
       try {
-        const productsResponse = await fetch(`${process.env.REACT_APP_API_URL}/product`);
-        if (!productsResponse.ok) throw new Error("Failed to fetch products");
-        const productsData = await productsResponse.json();
-        const filteredProductsData = productsData.Products?.filter((product: Product) => product.category_name !== "Uncategorized") || [];
-        setProducts(filteredProductsData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
+        setLoading(true);
+        const productList = await productService.getAllProducts();
+        setProducts(productList);
+        setFilteredProducts(productList);
+
+        const uniqueCategories = Array.from(
+          new Set(
+            productList
+              .map((product) => product.category_name)
+              .filter(
+                (category): category is string =>
+                  category !== undefined && category !== null
+              )
+          )
+        ).sort();
+
+        setCategories(uniqueCategories);
+      } catch (error) {
+        console.error("Error fetching products:", error);
       } finally {
         setLoading(false);
       }
     };
 
-
-    fetchData();
+    fetchProducts();
   }, []);
 
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory ? product.category_name === selectedCategory : true;
-    return matchesSearch && matchesCategory;
-  });
+  const filterProducts = (term: string, category: string) => {
+    let filtered = products;
 
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    const priceA = typeof a.price === 'string' ? parseFloat(a.price) : a.price;
-    const priceB = typeof b.price === 'string' ? parseFloat(b.price) : b.price;
-    return sortBy === 'price-low' ? priceA - priceB : priceB - priceA;
-  });
+    if (term) {
+      filtered = filtered.filter(
+        (product) =>
+          product.name.toLowerCase().includes(term.toLowerCase()) ||
+          product.latin_name.toLowerCase().includes(term.toLowerCase()) ||
+          (product.category_name?.toLowerCase() || "").includes(
+            term.toLowerCase()
+          )
+      );
+    }
 
-  const totalPages = Math.ceil(sortedProducts.length / itemsPerPage);
-  const displayedProducts = maxItems
-    ? sortedProducts.slice(0, maxItems)
-    : sortedProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+    if (category !== "all") {
+      filtered = filtered.filter(
+        (product) => product.category_name === category
+      );
+    }
 
-  const formatPrice = (price: number | string): string => {
-    const numericPrice = typeof price === "number" ? price : parseFloat(price) || 0;
-    return !isNaN(numericPrice) ? `Rp ${numericPrice.toLocaleString()}` : "Price not available";
+    filtered = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case "price-low":
+          return a.price - b.price;
+        case "price-high":
+          return b.price - a.price;
+        case "name":
+        default:
+          return a.name.localeCompare(b.name);
+      }
+    });
+
+    setFilteredProducts(filtered);
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
-      </div>
-    );
-  }
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const term = event.target.value;
+    setSearchTerm(term);
+    filterProducts(term, selectedCategory);
+  };
 
-  if (error) {
-    return <div className="text-center text-red-600 py-8">{error}</div>;
-  }
+  const handleCategoryChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const category = event.target.value;
+    setSelectedCategory(category);
+    filterProducts(searchTerm, category);
+  };
+
+  const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    setSortBy(value);
+    filterProducts(searchTerm, selectedCategory);
+  };
+
+  const handleMessageClick = (product: Product) => {
+    console.log(`Message clicked for product: ${product.name}`);
+  };
+
+  const handleDetailsClick = (product: Product) => {
+    console.log(`Details clicked for product: ${product.name}`);
+  };
 
   return (
-    <div className={`${className} container mx-auto px-4 sm:px-6 lg:px-8 mt-10`}>
-      <div className="flex flex-col sm:flex-row gap-6">
-
-        {/* Main Products Section */}
-        <div className="flex-grow">
-          <div className="flex flex-col gap-6">
-            {/* Search and Sort Section */}
-            {(showSearch || showSort) && (
-              <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                {showSearch && (
-                  <div className="relative flex-grow">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <input
-                      type="text"
-                      placeholder="Search products..."
-                      className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                  </div>
-                )}
-                {showSort && (
-                  <select
-                    className="w-full sm:w-auto px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as "price-low" | "price-high")}
-                  >
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
-                  </select>
-                )}
+    <div className="p-4">
+      {/* Conditionally render search and filter section */}
+      {showSearchAndFilter && (
+        <div className="mb-8">
+          <div className="bg-white rounded-lg shadow-sm p-4">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
               </div>
-            )}
 
-            {/* Products Grid */}
-            {displayedProducts.length === 0 ? (
-              <div className="text-center text-gray-500 py-8">
-                <p className="text-lg">No products found matching your criteria.</p>
-                <button
-                  className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  onClick={() => setSearchQuery("")}
-                >
-                  Clear Filters
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {displayedProducts.map(product => (
-                  <div
-                    key={product.id}
-                    className="bg-white rounded-lg shadow overflow-hidden hover:shadow-lg transition-shadow"
-                  >
-                    <img
-                      src={`${process.env.REACT_APP_API_URL}${product.image_url}`}
-                      alt={product.name}
-                      className="w-full h-48 object-cover"
-                    />
-                    <div className="p-4">
-                      <h3 className="font-semibold text-lg truncate">{product.name}</h3>
-                      <p className="text-gray-700">{formatPrice(product.price)}</p>
-                      <button
-                        className="mt-4 w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                        onClick={() => navigate(`/layanan/produk-layanan/${product.id}`)}
-                      >
-                        View Details
-                      </button>
-                    </div>
-                  </div>
+              <select
+                value={selectedCategory}
+                onChange={handleCategoryChange}
+                className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="all">All Categories</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
                 ))}
-              </div>
-            )}
+              </select>
 
-            {/* Pagination Section */}
-            {showPagination && totalPages > 1 && (
-              <div className="flex justify-between items-center mt-6">
-                <button
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(prev => prev - 1)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300"
-                >
-                  Previous
-                </button>
-                <span>
-                  Page {currentPage} of {totalPages}
-                </span>
-                <button
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(prev => prev + 1)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300"
-                >
-                  Next
-                </button>
-              </div>
-            )}
+              <select
+                value={sortBy}
+                onChange={handleSortChange}
+                className="px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="name">Sort by Name</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+              </select>
+            </div>
           </div>
         </div>
-      </div>
+      )}
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 p-4">
+          {filteredProducts.map((product) => (
+            <div
+              key={product.id}
+              className="bg-white rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105 hover:shadow-xl"
+            >
+              <div className="relative group">
+                <div className="overflow-hidden relative pb-[75%]">
+                  <img
+                    src={`${process.env.REACT_APP_API_URL}${product.image_url}`}
+                    alt={product.name}
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = "/placeholder-image.jpg";
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                </div>
+              </div>
+              <div className="p-6">
+                {product.category_name && (
+                  <div className="text-xs font-medium text-blue-600 mb-1">
+                    {product.category_name}
+                  </div>
+                )}
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                  {product.name}
+                </h3>
+                <p className="text-sm text-gray-600 italic mb-2">
+                  {product.latin_name}
+                </p>
+                <span className="text-xl font-bold text-gray-900 block mb-4">
+                  ${product.price.toFixed(2)}
+                </span>
+                <button
+                  onClick={() =>
+                    (window.location.href = `/layanan/produk-layanan/${product.id}`)
+                  }
+                  className="w-full mt-4 py-2 px-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Detail
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && filteredProducts.length === 0 && (
+        <div className="text-center py-12">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No products found
+          </h3>
+          <p className="text-gray-600">
+            Try adjusting your search or filter to find what you're looking for.
+          </p>
+        </div>
+      )}
     </div>
   );
 };
+
+export default ProductPage;

@@ -30,7 +30,7 @@ const DashboardProductCategory = () => {
     if (typeof data === 'string') {
       try {
         const parsedData = JSON.parse(data);
-        return Array.isArray(parsedData) ? parsedData : [];
+        return Array.isArray(parsedData) ? validateAndTransformCategories(parsedData) : [];
       } catch {
         console.error('Invalid JSON string received');
         return [];
@@ -43,13 +43,14 @@ const DashboardProductCategory = () => {
         // Handle primitive values
         if (typeof item === 'string' || typeof item === 'number') {
           return {
-            id: String(item),
+            id: typeof item === 'number' ? item : parseInt(item, 10) || Math.floor(Math.random() * 1000000),
             name: String(item)
           };
         }
         // Handle object values
+        const itemId = item.id || item._id;
         return {
-          id: String(item.id || item._id || Math.random().toString(36).substr(2, 9)),
+          id: typeof itemId === 'number' ? itemId : parseInt(String(itemId), 10) || Math.floor(Math.random() * 1000000),
           name: item.name || item.title || 'Unnamed Category'
         };
       });
@@ -61,8 +62,9 @@ const DashboardProductCategory = () => {
       
       // If data is a single category object
       if (data.id || data._id || data.name) {
+        const objId = data.id || data._id;
         return [{
-          id: String(data.id || data._id || Math.random().toString(36).substr(2, 9)),
+          id: typeof objId === 'number' ? objId : parseInt(String(objId), 10) || Math.floor(Math.random() * 1000000),
           name: data.name || data.title || 'Unnamed Category'
         }];
       }
@@ -156,19 +158,19 @@ const DashboardProductCategory = () => {
 
     try {
       const updatedData: UpdateCategoryData = {
-        id: editingCategory.id,
+        id: editingCategory.id.toString(), // Convert number to string here
         name: editingCategory.name,
       };
       await categoryService.updateCategory(updatedData);
       await refreshCategories();
       setSuccessMessage(userFriendlyMessages.UPDATE_SUCCESS);
-      setIsSuccessModalOpen(true); // Open success modal
+      setIsSuccessModalOpen(true);
       setEditingCategory(null);
       setIsModalOpen(false);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : userFriendlyMessages.UPDATE_FAILED;
       setError(errorMessage);
-      setIsErrorModalOpen(true); // Open error modal
+      setIsErrorModalOpen(true);
       console.error('Error updating category:', err);
     }
   };

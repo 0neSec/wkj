@@ -1,7 +1,8 @@
 import React from 'react';
 import Navbar from '../component/includes/navbar';
 import Footer from '../component/includes/footer';
-import TentangProfile from '../component/includes/about/Tentang';
+import TentangProfile from '../component/includes/Tentang/Tentang';
+import TaskManager from '../component/includes/Tentang/Task';
 
 function Tentang() {
   return (
@@ -27,7 +28,7 @@ function Tentang() {
                 <img
                   src="/assets/logo.png"
                   alt="Wisata Kesehatan Jamu Tegal"
-                  className="max-w-full h-auto" // Ensures the image is responsive
+                  className="max-w-full h-auto"
                 />
               </div>
 
@@ -38,9 +39,35 @@ function Tentang() {
                 <div className="h-1 w-20 bg-green-600 rounded-full" />
               </div>
             </div>
-            
-            {/* Profile Content */}
-            <TentangProfile />
+
+            {/* Task Manager Section */}
+            <section className="mt-16">
+              <div className="max-w-6xl mx-auto">
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <div className="text-center mb-8">
+                    <h2 className="text-3xl font-bold text-green-800 mb-4">
+                      Tentang Kami
+                    </h2>
+                    <div className="h-1 w-20 bg-green-600 mx-auto rounded-full" />
+                  </div>
+                  <TentangProfile />
+                </div>
+              </div>
+            </section>
+            {/* Task Manager Section */}
+            <section className="mt-16">
+              <div className="max-w-6xl mx-auto">
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <div className="text-center mb-8">
+                    <h2 className="text-3xl font-bold text-green-800 mb-4">
+                      Tugas & Fungsi
+                    </h2>
+                    <div className="h-1 w-20 bg-green-600 mx-auto rounded-full" />
+                  </div>
+                  <TaskManager />
+                </div>
+              </div>
+            </section>
           </div>
         </section>
       </main>
