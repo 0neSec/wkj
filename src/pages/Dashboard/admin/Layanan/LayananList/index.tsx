@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import Navbar from '../../../../component/includes/navbar';
-import Sidebar from '../../../../component/includes/sidebar';
-import { layananCategoryService, ServiceCategory } from '../../../../services/Layanan/LayananCategory';
-import { CreateServiceData, layananService, Service, UpdateServiceData } from '../../../../services/Layanan/ListLayanan';
+import Navbar from '../../../../../component/includes/navbar';
+import Sidebar from '../../../../../component/includes/sidebar';
+import { layananCategoryService, ServiceCategory } from '../../../../../services/Layanan/LayananCategory';
+import { CreateServiceData, layananService, Service, UpdateServiceData } from '../../../../../services/Layanan/ListLayanan';
 
 const DashboardServicePage: React.FC = () => {
   const [services, setServices] = useState<Service[]>([]);

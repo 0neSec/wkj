@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { FcGoogle } from 'react-icons/fc';
+import { FaFacebook } from 'react-icons/fa'
 import { useNavigate, useLocation } from 'react-router-dom';
-import { authService } from '../../services/auth.service';
+import { authService } from '../../../services/auth.service';
 
-export default function LoginPage() {
+export default function RegisterPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
+    username: '',
     email: '',
     password: '',
     rememberMe: false
@@ -70,12 +73,12 @@ export default function LoginPage() {
           className="mx-auto h-12 w-auto rounded-xl"
         />
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Masuk ke Akun Anda
+          Daftar Sekarang
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Atau{' '}
-          <a href="/register" className="font-medium text-blue-700 hover:text-blue-800">
-            daftar akun baru
+          <a href="/login" className="font-medium text-blue-700 hover:text-blue-800">
+            sudah punya akun
           </a>
         </p>
       </div>
@@ -97,6 +100,27 @@ export default function LoginPage() {
           )}
 
           <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Username
+              </label>
+              <div className="mt-1">
+                <input
+                  id="username"
+                  name="username"
+                  type="username"
+                  autoComplete="username"
+                  required
+                  value={formData.username}
+                  onChange={handleChange}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="username"
+                  disabled={isLoading}
+                />
+              </div>
+            </div>
+
+
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Email
@@ -194,22 +218,23 @@ export default function LoginPage() {
             </div>
 
             <div className="mt-6 grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                disabled={isLoading}
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-300 disabled:opacity-50"
-              >
-                <img className="h-5 w-5" src="/assets/google-icon.png" alt="Google logo" />
-                <span className="ml-2">Google</span>
-              </button>
-              <button
-                type="button"
-                disabled={isLoading}
-                className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-300 disabled:opacity-50"
-              >
-                <img className="h-5 w-5" src="/assets/facebook-icon.png" alt="Facebook logo" />
-                <span className="ml-2">Facebook</span>
-              </button>
+                <button
+                    type="button"
+                    disabled={isLoading}
+                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-300 disabled:opacity-50"
+                  >
+                    <FcGoogle className="h-5 w-5" />
+                    <span className="ml-2">Google</span>
+                </button>
+                
+                <button
+                    type="button"
+                    disabled={isLoading}
+                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-300 disabled:opacity-50"
+                  >
+                    <FaFacebook className="h-5 w-5 text-blue-600" />
+                    <span className="ml-2">Facebook</span>
+                </button>
             </div>
           </div>
         </div>

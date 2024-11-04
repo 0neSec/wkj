@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../../../../component/includes/navbar";
-import Sidebar from "../../../../component/includes/sidebar";
+import Navbar from "../../../../../component/includes/navbar";
+import Sidebar from "../../../../../component/includes/sidebar";
 import {
   ProductCategory,
   CreateCategoryData,
   UpdateCategoryData,
   productCategoryService,
-} from "../../../../services/product/product-category.service";
+} from "../../../../../services/product/product-category.service";
 import { userFriendlyMessages } from "./types";
 
 const DashboardProductCategory = () => {

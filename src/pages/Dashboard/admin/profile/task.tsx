@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import Navbar from "../../../component/includes/navbar";
-import Sidebar from "../../../component/includes/sidebar";
-import { userTaksMessages } from "../../../types/massage";
-import { CreateTaskData, TaskContent, taskService, UpdateTaskData } from "../../../services/Tentang/task";
+import Navbar from "../../../../component/includes/navbar";
+import Sidebar from "../../../../component/includes/sidebar";
+import { userTaksMessages } from "../../../../types/massage";
+import { CreateTaskData, TaskContent, taskService, UpdateTaskData } from "../../../../services/Tentang/task";
 
 
 const DashboardTask = () => {

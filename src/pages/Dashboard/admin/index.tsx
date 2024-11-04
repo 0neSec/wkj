@@ -7,8 +7,8 @@ import {
   Users, DollarSign, BookOpen, GraduationCap,
   TrendingUp, ArrowUpRight, ArrowDownRight
 } from 'lucide-react';
-import Sidebar from '../../component/includes/sidebar';
-import Navbar from '../../component/includes/navbar';
+import Sidebar from '../../../component/includes/sidebar';
+import Navbar from '../../../component/includes/navbar';
 
 const Dashboard = () => {
   // Sample data for charts

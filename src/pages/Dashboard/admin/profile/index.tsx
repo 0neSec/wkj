@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { CreateProfileData, ProfileContent, profileService, UpdateProfileData } from "../../../services/Tentang/TentangService";
-import Navbar from "../../../component/includes/navbar";
-import Sidebar from "../../../component/includes/sidebar";
-import { userTentangMessages } from "../../../types/massage";
+import { CreateProfileData, ProfileContent, profileService, UpdateProfileData } from "../../../../services/Tentang/TentangService";
+import Navbar from "../../../../component/includes/navbar";
+import Sidebar from "../../../../component/includes/sidebar";
+import { userTentangMessages } from "../../../../types/massage";
 
 const DashboardProfile = () => {
   const [profiles, setProfiles] = useState<ProfileContent[]>([]);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import Navbar from '../../../../component/includes/navbar';
-import Sidebar from '../../../../component/includes/sidebar';
-import { layananCategoryService, ServiceCategory } from '../../../../services/Layanan/LayananCategory';
+import Navbar from '../../../../../component/includes/navbar';
+import Sidebar from '../../../../../component/includes/sidebar';
+import { layananCategoryService, ServiceCategory } from '../../../../../services/Layanan/LayananCategory';
 
 interface ApiServiceCategory {
   id: string;
