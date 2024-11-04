@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { CreateProfileData, ProfileContent, profileService, UpdateProfileData } from "../../../services/profile";
+import { CreateProfileData, ProfileContent, profileService, UpdateProfileData } from "../../../services/Tentang";
 import Navbar from "../../../component/includes/navbar";
 import Sidebar from "../../../component/includes/sidebar";
 import { userFriendlyMessages } from "../../../types/profile";

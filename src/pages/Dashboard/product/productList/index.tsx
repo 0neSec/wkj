@@ -21,6 +21,7 @@ const DashboardProduct = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [formData, setFormData] = useState<Partial<CreateProductData>>({
     name: "",
     latin_name: "",
@@ -102,7 +103,12 @@ const DashboardProduct = () => {
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      setSelectedFile(event.target.files[0]);
+      const file = event.target.files[0];
+      setSelectedFile(file);
+      
+      // Create preview URL
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
     }
   };
 
@@ -156,6 +162,7 @@ const DashboardProduct = () => {
       composition: [],
     });
     setSelectedFile(null);
+    setImagePreview(null);
     setEditingProduct(null);
   };
 
@@ -172,7 +179,6 @@ const DashboardProduct = () => {
       const createData = {
         ...formData,
         image: selectedFile,
-        // Only include product_category_id if it has a value
         product_category_id: formData.product_category_id || undefined,
       } as CreateProductData;
 
@@ -198,7 +204,7 @@ const DashboardProduct = () => {
       };
 
       if (selectedFile) {
-        updateData.image = selectedFile; // Ensure selectedFile is a File object
+        updateData.image = selectedFile;
       }
 
       await productService.updateProduct(updateData);
@@ -254,20 +260,16 @@ const DashboardProduct = () => {
       price: product.price,
       unit_type: product.unit_type,
       product_category_id: product.product_category_id,
-      utilization: [],
-      composition: [],
+      utilization: product.utilization || [],
+      composition: product.composition || [],
     });
+    setImagePreview(product.image_url || null);
     setIsModalOpen(true);
   };
 
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-  const renderCategoryOptions = () => {
-    if (!Array.isArray(categories)) {
-      return <option value="">No categories available</option>;
-    }
-  };
 
   if (loading)
     return (
@@ -282,6 +284,7 @@ const DashboardProduct = () => {
         {error}
       </div>
     );
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <Navbar />
@@ -317,6 +320,7 @@ const DashboardProduct = () => {
                 <thead className="bg-gray-100">
                   <tr>
                     <th className="px-4 py-3 text-left">ID</th>
+                    <th className="px-4 py-3 text-left">Image</th>
                     <th className="px-4 py-3 text-left">Name</th>
                     <th className="px-4 py-3 text-left">Latin Name</th>
                     <th className="px-4 py-3 text-left">Price</th>
@@ -328,6 +332,15 @@ const DashboardProduct = () => {
                   {filteredProducts.map((product) => (
                     <tr key={product.id} className="border-b hover:bg-gray-50">
                       <td className="px-4 py-3">{product.id}</td>
+                      <td className="px-4 py-3">
+                        {product.image_url && (
+                          <img
+                            src={product.image_url}
+                            alt={product.name}
+                            className="w-16 h-16 object-cover rounded"
+                          />
+                        )}
+                      </td>
                       <td className="px-4 py-3">{product.name}</td>
                       <td className="px-4 py-3">{product.latin_name}</td>
                       <td className="px-4 py-3">
@@ -353,7 +366,7 @@ const DashboardProduct = () => {
                   {filteredProducts.length === 0 && (
                     <tr>
                       <td
-                        colSpan={6}
+                        colSpan={7}
                         className="px-4 py-3 text-center text-gray-500"
                       >
                         No products found
@@ -363,12 +376,52 @@ const DashboardProduct = () => {
                 </tbody>
               </table>
             </div>
+
             {isModalOpen && (
               <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
                 <div className="bg-white rounded-lg p-6 max-w-[90vw] sm:max-w-4xl mx-auto max-h-[90vh] overflow-y-auto">
                   <h2 className="text-lg sm:text-xl font-bold mb-4">
                     {editingProduct ? "Edit Product" : "Add Product"}
                   </h2>
+
+                  {/* Image Upload Section */}
+                  <div className="mb-6">
+                    <label className="block text-gray-700 mb-2">Product Image</label>
+                    <div className="flex flex-col sm:flex-row items-center gap-4">
+                      <div className="w-full sm:w-1/3">
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                          className="border rounded-lg w-full p-2"
+                        />
+                      </div>
+                      {imagePreview && (
+                        <div className="w-full sm:w-1/3">
+                          <img
+                            src={imagePreview}
+                            alt="Preview"
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                        </div>
+                      )}
+                      {editingProduct && editingProduct.image_url && !imagePreview && (
+                        <div className="w-full sm:w-1/3">
+                          <img
+                            src={editingProduct.image_url}
+                            alt="Current"
+                            className="w-full h-32 object-cover rounded-lg"
+                          />
+                          <p className="text-sm text-gray-500 mt-1">Current image</p>
+                        </div>
+                      )}
+                    </div>
+                    {!selectedFile && !editingProduct && (
+                      <p className="text-sm text-red-500 mt-1">
+                        Please select an image for the product
+                      </p>
+                    )}
+                  </div>
 
                   {/* Basic Information */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -385,7 +438,7 @@ const DashboardProduct = () => {
                       />
                     </div>
                     <div className="mb-4">
-                      <label className="block text-gray-700">Latin Name</label>
+                    <label className="block text-gray-700">Latin Name</label>
                       <input
                         type="text"
                         name="latin_name"
@@ -445,7 +498,75 @@ const DashboardProduct = () => {
                     </div>
                   </div>
 
-                  {/* Other Fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="mb-4">
+                      <label className="block text-gray-700">Harvest Age</label>
+                      <input
+                        type="text"
+                        name="harvest_age"
+                        value={formData.harvest_age}
+                        onChange={handleInputChange}
+                        className="border rounded-lg w-full p-2"
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-gray-700">Morphology</label>
+                      <input
+                        type="text"
+                        name="morphology"
+                        value={formData.morphology}
+                        onChange={handleInputChange}
+                        className="border rounded-lg w-full p-2"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="mb-4">
+                      <label className="block text-gray-700">Area Name</label>
+                      <input
+                        type="text"
+                        name="area_name"
+                        value={formData.area_name}
+                        onChange={handleInputChange}
+                        className="border rounded-lg w-full p-2"
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-gray-700">Efficacy</label>
+                      <input
+                        type="text"
+                        name="efficacy"
+                        value={formData.efficacy}
+                        onChange={handleInputChange}
+                        className="border rounded-lg w-full p-2"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Research Results & Description */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="mb-4">
+                      <label className="block text-gray-700">Research Results</label>
+                      <textarea
+                        name="research_results"
+                        value={formData.research_results}
+                        onChange={handleInputChange}
+                        className="border rounded-lg w-full p-2 h-32"
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-gray-700">Description</label>
+                      <textarea
+                        name="description"
+                        value={formData.description}
+                        onChange={handleInputChange}
+                        className="border rounded-lg w-full p-2 h-32"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Array Inputs */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <ArrayInput
                       label="Utilization"

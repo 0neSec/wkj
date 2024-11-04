@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ProfileContent, profileService } from '../../../services/profile';
+import { ProfileContent, profileService } from '../../../services/Tentang';
 import { Loader2 } from 'lucide-react';
 
 const TentangProfile: React.FC = () => {
