@@ -62,8 +62,8 @@ const Sidebar = () => {
       path: "/content",
       submenu: [
         { label: "Tentang", path: "/dashboard/content/tentang" },
-        { label: "Visi", path: "/dashboard/content/visi" },
-        { label: "Tugas dan Fungsi", path: "/dashboard/content/tugas-fungsi" },
+        { label: "Task", path: "/dashboard/content/task" },
+        { label: "Fungsi", path: "/dashboard/content/funtion" },
         { label: "Visi Misi", path: "/dasboard/content/visi-misi" },
         { label: "Sejarah", path: "/dasboard/content/sejarah" },
         { label: "Struktur Organisasi", path: "/dasboard/content/struktur-organisasi" },

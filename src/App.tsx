@@ -29,6 +29,8 @@ import DasboardServiceCategoryPage from "./pages/Dashboard/Layanan/Layanan-Categ
 import DashboardServicePage from "./pages/Dashboard/Layanan/LayananList";
 import ProductDetail from "./component/includes/product/Detail";
 import DashboardProfile from "./pages/Dashboard/profile";
+import DashboardTask from "./pages/Dashboard/profile/task";
+import FunctionManagement from "./pages/Dashboard/profile/fungsiTentang";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -143,10 +145,18 @@ function App() {
           }
         />
         <Route
-          path="/dashboard/content/tugas-fungsi"
+          path="/dashboard/content/task"
           element={
             <ProtectedRoute requiredRole="admin">
-              <DashboardProfile />
+              <DashboardTask />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/content/funtion"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <FunctionManagement />
             </ProtectedRoute>
           }
         />
