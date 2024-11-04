@@ -297,7 +297,7 @@ const DashboardProduct = () => {
         <div className="flex-1 p-4 md:p-6 mt-10">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold text-gray-800">Product List</h1>
+              <h1 className="text-3xl font-bold text-gray-800">Daftar Produk</h1>
               <button
                 onClick={() => {
                   resetForm();
@@ -305,14 +305,14 @@ const DashboardProduct = () => {
                 }}
                 className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
               >
-                Add New Product
+                Tambah Produk
               </button>
             </div>
 
             <div className="mb-6">
               <input
                 type="text"
-                placeholder="Search products..."
+                placeholder="Cari produk..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg"
@@ -323,12 +323,12 @@ const DashboardProduct = () => {
               <table className="w-full">
                 <thead className="bg-gray-100">
                   <tr>
-                    <th className="px-4 py-3 text-left">ID</th>
-                    <th className="px-4 py-3 text-left">Name</th>
-                    <th className="px-4 py-3 text-left">Latin Name</th>
-                    <th className="px-4 py-3 text-left">Price</th>
-                    <th className="px-4 py-3 text-left">Category</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
+                    <th className="px-4 py-3 text-left">No</th>
+                    <th className="px-4 py-3 text-left">Nama Produk</th>
+                    <th className="px-4 py-3 text-left">Nama Latin</th>
+                    <th className="px-4 py-3 text-left">Harga</th>
+                    <th className="px-4 py-3 text-left">Kategori</th>
+                    <th className="px-4 py-3 text-right">Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -338,7 +338,7 @@ const DashboardProduct = () => {
                       <td className="px-4 py-3">{product.name}</td>
                       <td className="px-4 py-3">{product.latin_name}</td>
                       <td className="px-4 py-3">
-                        ${Number(product.price).toFixed(2)}
+                        Rp.{Number(product.price).toFixed(2)}
                       </td>
                       <td className="px-4 py-3">{product.category_name}</td>
                       <td className="px-4 py-3 text-right space-x-2">
@@ -375,14 +375,14 @@ const DashboardProduct = () => {
               <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
                 <div className="bg-white rounded-lg p-6 max-w-4xl mx-auto max-h-[90vh] overflow-y-auto">
                   <h2 className="text-xl font-bold mb-4">
-                    {editingProduct ? "Edit Product" : "Add Product"}
+                    {editingProduct ? "Edit Produk" : "Tambah Produk"}
                   </h2>
 
                   {/* Basic Information */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="mb-4">
                       <label className="block text-gray-700">
-                        Product Name
+                        Nama Produk
                       </label>
                       <input
                         type="text"
@@ -393,7 +393,7 @@ const DashboardProduct = () => {
                       />
                     </div>
                     <div className="mb-4">
-                      <label className="block text-gray-700">Latin Name</label>
+                      <label className="block text-gray-700">Nama Latin</label>
                       <input
                         type="text"
                         name="latin_name"
@@ -407,7 +407,7 @@ const DashboardProduct = () => {
                   {/* Additional Fields */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="mb-4">
-                      <label className="block text-gray-700">Synonym</label>
+                      <label className="block text-gray-700">sinonim</label>
                       <input
                         type="text"
                         name="synonym"
@@ -430,7 +430,7 @@ const DashboardProduct = () => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="mb-4">
-                      <label className="block text-gray-700">Part Used</label>
+                      <label className="block text-gray-700">Bagian yang digunakan</label>
                       <input
                         type="text"
                         name="part_used"
@@ -441,7 +441,7 @@ const DashboardProduct = () => {
                     </div>
                     <div className="mb-4">
                       <label className="block text-gray-700">
-                        Method of Reproduction
+                        Cara Perkembangbiakan
                       </label>
                       <input
                         type="text"
@@ -455,7 +455,7 @@ const DashboardProduct = () => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="mb-4">
-                      <label className="block text-gray-700">Harvest Age</label>
+                      <label className="block text-gray-700">Usia Panen</label>
                       <input
                         type="text"
                         name="harvest_age"
@@ -465,7 +465,7 @@ const DashboardProduct = () => {
                       />
                     </div>
                     <div className="mb-4">
-                      <label className="block text-gray-700">Area Name</label>
+                      <label className="block text-gray-700">Nama Daerah</label>
                       <input
                         type="text"
                         name="area_name"
@@ -478,7 +478,7 @@ const DashboardProduct = () => {
 
                   {/* Detailed Information */}
                   <div className="mb-4">
-                    <label className="block text-gray-700">Morphology</label>
+                    <label className="block text-gray-700">Morfologi</label>
                     <textarea
                       name="morphology"
                       value={formData.morphology}
@@ -489,7 +489,7 @@ const DashboardProduct = () => {
                   </div>
 
                   <div className="mb-4">
-                    <label className="block text-gray-700">Efficacy</label>
+                    <label className="block text-gray-700">Khasiat</label>
                     <textarea
                       name="efficacy"
                       value={formData.efficacy}
@@ -501,7 +501,7 @@ const DashboardProduct = () => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <ArrayInput
-                      label="Utilization"
+                      label="Pemanfaatan"
                       value={formData.utilization}
                       onChange={(newValue) =>
                         setFormData((prev) => ({
@@ -509,10 +509,10 @@ const DashboardProduct = () => {
                           utilization: newValue,
                         }))
                       }
-                      placeholder="Enter a utilization"
+                      placeholder="Tambah Pemanfaatan"
                     />
                     <ArrayInput
-                      label="Composition"
+                      label="Komposisi"
                       value={formData.composition}
                       onChange={(newValue) =>
                         setFormData((prev) => ({
@@ -520,13 +520,13 @@ const DashboardProduct = () => {
                           composition: newValue,
                         }))
                       }
-                      placeholder="Enter a composition"
+                      placeholder="Tambah Komposisi"
                     />
                   </div>
 
                   <div className="mb-4">
                     <label className="block text-gray-700">
-                      Research Results
+                      Hasil Riset
                     </label>
                     <textarea
                       name="research_results"
@@ -538,7 +538,7 @@ const DashboardProduct = () => {
                   </div>
 
                   <div className="mb-4">
-                    <label className="block text-gray-700">Description</label>
+                    <label className="block text-gray-700">Deskripsi</label>
                     <textarea
                       name="description"
                       value={formData.description}
@@ -551,7 +551,7 @@ const DashboardProduct = () => {
                   {/* Price and Category Section */}
                   <div className="grid grid-cols-3 gap-4">
                     <div className="mb-4">
-                      <label className="block text-gray-700">Price</label>
+                      <label className="block text-gray-700">Harga</label>
                       <input
                         type="number"
                         name="price"
@@ -561,7 +561,7 @@ const DashboardProduct = () => {
                       />
                     </div>
                     <div className="mb-4">
-                      <label className="block text-gray-700">Unit Type</label>
+                      <label className="block text-gray-700">Satuan</label>
                       <input
                         type="text"
                         name="unit_type"
@@ -571,14 +571,14 @@ const DashboardProduct = () => {
                       />
                     </div>
                     <div className="mb-4">
-                      <label className="block text-gray-700">Category</label>
+                      <label className="block text-gray-700">Kategori</label>
                       <select
                         name="product_category_id"
                         value={formData.product_category_id}
                         onChange={handleInputChange}
                         className="border rounded-lg w-full p-2"
                       >
-                        <option value="">Select Category</option>
+                        <option value="">Pilih Kategori</option>
                         {categories.map((category) => (
                           <option key={category.id} value={category.id}>
                             {category.name}
@@ -588,7 +588,7 @@ const DashboardProduct = () => {
                     </div>
                   </div>
                   <div className="mb-4">
-                    <label className="block text-gray-700">Product Image</label>
+                    <label className="block text-gray-700">Gambar Produk</label>
                     <input
                       type="file"
                       accept="image/*"

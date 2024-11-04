@@ -58,7 +58,7 @@ function Profile() {
                 </a>
                 <a
                   href="https://linkedin.com"
-                  target="_blank"
+                  target="_blank"   
                   rel="noopener noreferrer"
                   className="text-blue-700 hover:text-blue-900 transition duration-200"
                 >

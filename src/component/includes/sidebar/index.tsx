@@ -40,33 +40,36 @@ const Sidebar = () => {
     },
     {
       id: "users",
-      label: "User",
+      label: "Pengguna",
       icon: Users,
       path: "/dashboard/users",
     },
     {
       id: "products",
-      label: "Product",
+      label: "Produk",
       icon: Package,
       path: "/dashboard/products",
       submenu: [
-        { label: "Product List", path: "/dashboard/products-list" },
-        { label: "Product Category", path: "/dashboard/product-category" },
+        { label: "Daftar Produk", path: "/dashboard/products-list" },
+        { label: "Kategori Produk", path: "/dashboard/product-category" },
       ],
     },
     // New Dropdown Menu for "Content" Section
     {
       id: "content",
-      label: "Content",
+      label: "Manajemen Konten",
       icon: BookOpen, // Use an appropriate icon
       path: "/content",
       submenu: [
         { label: "Tentang", path: "/dashboard/content/tentang" },
         { label: "Task", path: "/dashboard/content/task" },
         { label: "Fungsi", path: "/dashboard/content/funtion" },
-        { label: "Visi Misi", path: "/dasboard/content/visi-misi" },
-        { label: "Sejarah", path: "/dasboard/content/sejarah" },
-        { label: "Struktur Organisasi", path: "/dasboard/content/struktur-organisasi" },
+        { label: "Visi Misi", path: "#" },
+        { label: "Sejarah", path: "#" },
+        { label: "Struktur Organisasi", path: "#" },
+        // { label: "Visi Misi", path: "/dasboard/content/visi-misi" },
+        // { label: "Sejarah", path: "/dasboard/content/sejarah" },
+        // { label: "Struktur Organisasi", path: "/dasboard/content/struktur-organisasi" },
       ],
     },
     {
@@ -75,9 +78,12 @@ const Sidebar = () => {
       icon: GraduationCap,
       path: "/training",
       submenu: [
-        { label: "Daftar Pelatihan", path: "/training/list" },
-        { label: "Jadwal", path: "/training/schedule" },
-        { label: "Peserta", path: "/training/participants" },
+        { label: "Daftar Pelatihan", path: "#" },
+        { label: "Jadwal", path: "#" },
+        { label: "Peserta", path: "#" },
+        // { label: "Daftar Pelatihan", path: "/training/list" },
+        // { label: "Jadwal", path: "/training/schedule" },
+        // { label: "Peserta", path: "/training/participants" },
       ],
     },
     {
@@ -86,16 +92,20 @@ const Sidebar = () => {
       icon: Compass,
       path: "/education",
       submenu: [
-        { label: "Destinasi", path: "/education/destinations" },
-        { label: "Booking", path: "/education/bookings" },
-        { label: "Review", path: "/education/reviews" },
+        { label: "Destinasi", path: "#" },
+        { label: "Booking", path: "#" },
+        { label: "Review", path: "#" },
+        // { label: "Destinasi", path: "/education/destinations" },
+        // { label: "Booking", path: "/education/bookings" },
+        // { label: "Review", path: "/education/reviews" },
       ],
     },
     {
       id: "articles",
       label: "Artikel",
       icon: BookOpen,
-      path: "/articles",
+      // path: "/articles",
+      path: "#",
     },
     {
       id: "services",
@@ -103,8 +113,10 @@ const Sidebar = () => {
       icon: BookOpen,
       path: "/dashboard/services",
       submenu: [
-        { label: "Services", path: "/dashboard/services" },
-        { label: "Service Category", path: "/dashboard/service-category" },
+        { label: "Services", path: "#" },
+        { label: "Service Category", path: "#" },
+        // { label: "Services", path: "/dashboard/services" },
+        // { label: "Service Category", path: "/dashboard/service-category" },
       ],
     },
   ];
