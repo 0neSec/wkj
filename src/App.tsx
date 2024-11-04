@@ -60,7 +60,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/artikel" element={<Article />} />
         <Route path="/tentang" element={<Tentang />} />
-        <Route path="/detection-ai" element={<DetectionPage />} />
+        <Route path="/identifikasi-tanaman" element={<DetectionPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/artikel/:slug" element={<ShowArticle />} />
 

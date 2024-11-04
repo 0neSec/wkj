@@ -2,10 +2,12 @@ import React from "react";
 import Navbar from "../component/includes/navbar";
 import Footer from "../component/includes/footer";
 import Blog from "../component/includes/artikel";
-import Faq from "../component/particle/faq";
 import HeroBanner from "../component/includes/banner";
 import ServiceGrid from "../component/includes/card/Layanan";
 import ProductPage from "../component/includes/product";
+import Detection from "../component/includes/detaction";
+import CatalogGrid from "../component/includes/card/catalog";
+import NewsGrid from "../component/includes/card/berita";
 
 function Home() {
   return (
@@ -38,7 +40,40 @@ function Home() {
               </div>
             </div>
           </div>
-          <Blog isHomePage={true} />
+          <div className="py-8 mt-5">
+            <div className="container mx-auto px-4">
+              <h1 className="text-3xl font-bold text-gray-900 text-center">
+                Identifikasi Tanaman
+              </h1>
+              
+              <div className="mt-8">
+                <Detection />
+              </div>
+            </div>
+          </div>
+          <div className="py-8 mt-5">
+            <div className="container mx-auto px-4">
+              <h1 className="text-3xl font-bold text-gray-900 text-center">
+                Katalog Produk
+              </h1>
+              
+              <div className="mt-8">
+                <CatalogGrid />
+              </div>
+            </div>
+          </div>
+          <div className="py-8 mt-5">
+            <div className="container mx-auto px-4">
+              <h1 className="text-3xl font-bold text-gray-900 text-center">
+                Berita Terkait
+              </h1>
+              
+              <div className="mt-8">
+                <NewsGrid isHomePage={true} />
+              </div>
+            </div>
+          </div>
+          {/* <Blog isHomePage={true} /> */}
           {/* <Faq /> */}
         </div>
       </main>

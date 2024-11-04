@@ -3,4 +3,4 @@ pelayanan wkj
 identifikasi tanaman
 katalog produk
 berita
-jam pelayanan dan ppendaftaran di footer
+jam pelayanan dan pendaftaran di footer

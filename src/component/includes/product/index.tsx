@@ -195,7 +195,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
                   {product.latin_name}
                 </p>
                 <span className="text-xl font-bold text-gray-900 block mb-4">
-                  ${product.price.toFixed(2)}
+                  Rp.{product.price.toFixed(2)}
                 </span>
                 <button
                   onClick={() =>

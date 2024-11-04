@@ -1,5 +1,5 @@
 {
-    "menuItems": ["Beranda", "Layanan", "Artikel", "Detection AI", "Tentang"],
+    "menuItems": ["Beranda", "Layanan", "Artikel", "Identifikasi Tanaman", "Tentang"],
     "services": [
       {
         "id": 1,

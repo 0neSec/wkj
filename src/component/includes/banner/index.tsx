@@ -9,7 +9,7 @@ const HeroBanner = () => {
             Wisata Kesehatan Jamu
           </h1>
           <p className="text-gray-600 mb-6">
-            Lorem ipsum dolor sit, amet consectetur adipisicing elit. Magnam, odit. Dicta pariatur vitae necessitatibus? Soluta odit reiciendis, totam ex quibusdam atque, magni corrupti id dignissimos quod tempore expedita voluptate rerum.
+          Wisata Kesehatan Jamu (WKJ) adalah satu jenis fasilitas pelayanan kesehatan masyarakat yang ada di Kabupaten Tegal dan merupakan program unggulan dari Pemerintah Kabupaten Tegal serta satu-satunya fasilitas pelayanan kesehatan tradisional milik Pemerintah yang memadukan dunia ilmu kedokteran konvensional dengan pengobatan tradisional.
           </p>
           <button className="bg-blue-500 hover:bg-blue-400 text-white font-bold py-2 px-4 rounded-xl">
             Eksplor kesehatan jamu
