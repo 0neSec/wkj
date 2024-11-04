@@ -4,11 +4,7 @@ import axios, { AxiosError, AxiosInstance } from 'axios';
 export interface ProductCategory {
   id: string;
   name: string;
-  count?:string;
 }
-
-
-// Data transfer types
 export interface CreateCategoryData {
   name: string;
 }

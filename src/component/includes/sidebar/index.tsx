@@ -54,6 +54,21 @@ const Sidebar = () => {
         { label: "Product Category", path: "/dashboard/product-category" },
       ],
     },
+    // New Dropdown Menu for "Content" Section
+    {
+      id: "content",
+      label: "Content",
+      icon: BookOpen, // Use an appropriate icon
+      path: "/content",
+      submenu: [
+        { label: "Tentang", path: "/dashboard/content/tentang" },
+        { label: "Visi", path: "/dashboard/content/visi" },
+        { label: "Tugas dan Fungsi", path: "/dashboard/content/tugas-fungsi" },
+        { label: "Visi Misi", path: "/dasboard/content/visi-misi" },
+        { label: "Sejarah", path: "/dasboard/content/sejarah" },
+        { label: "Struktur Organisasi", path: "/dasboard/content/struktur-organisasi" },
+      ],
+    },
     {
       id: "training",
       label: "Pelatihan & Workshop",
@@ -85,7 +100,7 @@ const Sidebar = () => {
     {
       id: "services",
       label: "Layanan",
-      icon: BookOpen, // Use an appropriate icon
+      icon: BookOpen,
       path: "/dashboard/services",
       submenu: [
         { label: "Services", path: "/dashboard/services" },
@@ -93,6 +108,7 @@ const Sidebar = () => {
       ],
     },
   ];
+  
   
 
   const toggleSubmenu = (itemId: string): void => {

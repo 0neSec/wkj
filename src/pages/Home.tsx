@@ -4,7 +4,7 @@ import Footer from "../component/includes/footer";
 import Blog from "../component/includes/artikel";
 import Faq from "../component/particle/faq";
 import HeroBanner from "../component/includes/banner";
-import { ProductGrid } from "../component/includes/product";
+import { ProductGrid  } from "../component/includes/product";
 import ServiceGrid from "../component/includes/card/Layanan";
 
 function Home() {
@@ -25,7 +25,7 @@ function Home() {
               <div className="p-10">
                 <ProductGrid
                   showSearch={false}
-                  showCategories={false}
+                  // showCategories={false}
                   maxItems={8} // Optional: limit number of items shown
                   showSort={false}
                 />
