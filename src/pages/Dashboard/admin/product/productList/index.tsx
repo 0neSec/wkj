@@ -47,7 +47,8 @@ const DashboardProduct = () => {
     const fetchInitialData = async () => {
       try {
         const productsData = await productService.getAllProducts();
-        const categoriesData = await productCategoryService.getProductCategories();
+        const categoriesData =
+          await productCategoryService.getProductCategories();
 
         if (Array.isArray(categoriesData)) {
           setCategories(categoriesData);
@@ -171,13 +172,20 @@ const DashboardProduct = () => {
       alert("Please select an image");
       return;
     }
+    if (!formData.product_category_id) {
+      alert("Please select a category");
+      return;
+    }
+
     try {
       const createData = {
         ...formData,
         image: selectedFile,
-        product_category_id: formData.product_category_id ,
+        // Ensure product_category_id is properly typed and passed
+        product_category_id: formData.product_category_id,
       } as CreateProductData;
-      console.log("data:", createData);
+
+      console.log("Sending data:", createData);
 
       await productService.createProduct(createData);
       resetForm();
@@ -201,7 +209,7 @@ const DashboardProduct = () => {
       };
 
       if (selectedFile) {
-        updateData.image = selectedFile; 
+        updateData.image = selectedFile;
       }
 
       await productService.updateProduct(updateData);
@@ -293,7 +301,9 @@ const DashboardProduct = () => {
         <div className="flex-1 p-4 md:p-6 mt-10">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold text-gray-800">Daftar Produk</h1>
+              <h1 className="text-3xl font-bold text-gray-800">
+                Daftar Produk
+              </h1>
               <button
                 onClick={() => {
                   resetForm();
@@ -377,9 +387,7 @@ const DashboardProduct = () => {
                   {/* Basic Information */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="mb-4">
-                      <label className="block text-gray-700">
-                        Nama Produk
-                      </label>
+                      <label className="block text-gray-700">Nama Produk</label>
                       <input
                         type="text"
                         name="name"
@@ -426,7 +434,9 @@ const DashboardProduct = () => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="mb-4">
-                      <label className="block text-gray-700">Bagian yang digunakan</label>
+                      <label className="block text-gray-700">
+                        Bagian yang digunakan
+                      </label>
                       <input
                         type="text"
                         name="part_used"
@@ -521,9 +531,7 @@ const DashboardProduct = () => {
                   </div>
 
                   <div className="mb-4">
-                    <label className="block text-gray-700">
-                      Hasil Riset
-                    </label>
+                    <label className="block text-gray-700">Hasil Riset</label>
                     <textarea
                       name="research_results"
                       value={formData.research_results}
