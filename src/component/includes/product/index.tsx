@@ -113,7 +113,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
   };
 
   return (
-    <div className="p-4">
+    <div className="">
       {/* Conditionally render search and filter section */}
       {showSearchAndFilter && (
         <div className="mb-8">

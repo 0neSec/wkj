@@ -11,20 +11,20 @@ import NewsGrid from "../component/includes/card/berita";
 
 function Home() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col ">
       <Navbar />
       <main className="flex-grow">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <HeroBanner />
           <div className="py-8 mt-5">
-            <div className="container mx-auto px-4">
+            <div className="">
               <h1 className="text-3xl font-bold text-gray-900 text-center">
                 Layanan Produk
               </h1>
               <p className="mt-2 text-gray-600 text-center">
                 Temukan produk herbal terbaik untuk kesehatan Anda
               </p>
-              <div className="p-10">
+              <div className="">
               <ProductPage showSearchAndFilter={false}   limit={6}/>
               </div>
             </div>

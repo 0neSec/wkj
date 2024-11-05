@@ -112,8 +112,6 @@ const Sidebar = () => {
       submenu: [
         { label: "Services", path: "#" },
         { label: "Service Category", path: "#" },
-        // { label: "Services", path: "/dashboard/services" },
-        // { label: "Service Category", path: "/dashboard/service-category" },
       ],
     },
   ];
@@ -144,7 +142,7 @@ const Sidebar = () => {
     <>
       {/* Mobile Menu Toggle */}
       <button
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md mt-10"
+        className="lg:hidden fixed top-4 left-4 z-20 p-2 bg-white rounded-lg shadow-md mt-14"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
       >
         {isMobileOpen ? (

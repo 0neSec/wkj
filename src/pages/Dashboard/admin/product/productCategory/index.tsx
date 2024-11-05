@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import {  CreateProductCategoryData, ProductCategory, productCategoryService, UpdateProductCategoryData } from '../../../../../services/product/product-category.service';
+import { CreateProductCategoryData, ProductCategory, productCategoryService, UpdateProductCategoryData } from '../../../../../services/product/product-category.service';
 import Navbar from '../../../../../component/includes/navbar';
 import Sidebar from '../../../../../component/includes/sidebar';
+import { Menu } from 'lucide-react';
 
 const ProductCategoryManagementPage: React.FC = () => {
   const [categories, setCategories] = useState<ProductCategory[]>([]);
@@ -11,6 +12,7 @@ const ProductCategoryManagementPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
 
   useEffect(() => {
     fetchCategories();
@@ -96,14 +98,14 @@ const ProductCategoryManagementPage: React.FC = () => {
   : [];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen">
       <Navbar />
-      <div className="flex">
+      <div className="flex flex-col md:flex-row mt-24">
         <Sidebar />
-        <div className="flex-1 p-6 mt-10">
+        <div className="flex-1 p-4 md:p-6 mt-4 md:mt-10">
           <div className="max-w-7xl mx-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold text-gray-800">Product Category Management</h1>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-800">Product Category Management</h1>
               <button
                 onClick={() => {
                   setIsModalOpen(true);
@@ -126,8 +128,8 @@ const ProductCategoryManagementPage: React.FC = () => {
               />
             </div>
 
-            <div className="bg-white shadow-md rounded-lg overflow-hidden">
-              <table className="w-full">
+            <div className="bg-white shadow-md rounded-lg overflow-x-auto">
+              <table className="w-full min-w-[650px]">
                 <thead className="bg-gray-100">
                   <tr>
                     <th className="px-4 py-3 text-left">ID</th>
@@ -150,7 +152,9 @@ const ProductCategoryManagementPage: React.FC = () => {
                             className="border px-2 py-1 rounded-lg w-full"
                           />
                         ) : (
-                          category.name
+                          <div className="max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg truncate">
+                          {category.name}
+                          </div>
                         )}
                       </td>
                       <td className="px-4 py-3 text-right">
