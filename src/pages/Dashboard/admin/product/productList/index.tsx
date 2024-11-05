@@ -172,10 +172,6 @@ const DashboardProduct = () => {
       alert("Please select an image");
       return;
     }
-    if (!formData.product_category_id) {
-      alert("Please select a category");
-      return;
-    }
 
     try {
       const createData = {
