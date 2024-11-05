@@ -1,87 +1,107 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from '../../../../component/includes/navbar';
-import Sidebar from '../../../../component/includes/sidebar';
-import { CreateProductCategoryData, ProductCategory, productCategoryService, UpdateProductCategoryData } from '../../../../services/product/product-category.service';
+import React, { useEffect, useState } from "react";
+import { CreateHistoryData, HistoryContent, historyService, UpdateHistoryData } from "../../../../services/Tentang/HistoryService";
+import Navbar from "../../../../component/includes/navbar";
+import Sidebar from "../../../../component/includes/sidebar";
 
-const ProductCategoryManagementPage = () => {
-  const [categories, setCategories] = useState<ProductCategory[]>([]);
-  const [newCategory, setNewCategory] = useState<CreateProductCategoryData>({ name: '' });
-  const [editingCategory, setEditingCategory] = useState<UpdateProductCategoryData | null>(null);
+const HistoryManagement = () => {
+  const [histories, setHistories] = useState<HistoryContent[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isErrorModalOpen, setIsErrorModalOpen] = useState<boolean>(false);
   const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false);
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [editingHistory, setEditingHistory] = useState<HistoryContent | null>(null);
+  const [newHistory, setNewHistory] = useState<CreateHistoryData>({ description: "" });
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   useEffect(() => {
-    fetchCategories();
+    fetchHistories();
   }, []);
 
-  const fetchCategories = async () => {
+  const fetchHistories = async () => {
+    setLoading(true);
     try {
-      const categories = await productCategoryService.getProductCategories();
-      setCategories(categories);
+      const response = await historyService.getHistories();
+      setHistories(response);
     } catch (err) {
-      setError('Failed to fetch product categories');
+      setError("Failed to fetch histories");
       setIsErrorModalOpen(true);
+      console.error("Error fetching histories:", err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleCreateCategory = async () => {
-    if (!newCategory.name.trim()) {
-      setError('Category name cannot be empty');
+  const handleCreateHistory = async () => {
+    if (!newHistory.description.trim()) {
+      setError("History description cannot be empty");
       setIsErrorModalOpen(true);
       return;
     }
 
     try {
-      await productCategoryService.createProductCategory(newCategory);
-      setNewCategory({ name: '' });
-      setSuccessMessage('Product category created successfully');
+      await historyService.createHistory(newHistory);
+      await fetchHistories();
+      setSuccessMessage("History created successfully");
       setIsSuccessModalOpen(true);
-      await fetchCategories();
+      setNewHistory({ description: "" });
       setIsModalOpen(false);
     } catch (err) {
-      setError('Failed to create product category');
+      setError("Failed to create history");
       setIsErrorModalOpen(true);
+      console.error("Error creating history:", err);
     }
   };
 
-  const handleUpdateCategory = async () => {
-    if (!editingCategory) return;
+  const handleUpdateHistory = async () => {
+    if (!editingHistory) return;
 
     try {
-      await productCategoryService.updateProductCategory(editingCategory);
-      setEditingCategory(null);
-      setSuccessMessage('Product category updated successfully');
+      const updatedData: UpdateHistoryData = {
+        id: editingHistory.id,
+        description: editingHistory.description,
+      };
+      await historyService.updateHistory(updatedData);
+      await fetchHistories();
+      setSuccessMessage("History updated successfully");
       setIsSuccessModalOpen(true);
-      await fetchCategories();
+      setEditingHistory(null);
       setIsModalOpen(false);
     } catch (err) {
-      setError('Failed to update product category');
+      setError("Failed to update history");
       setIsErrorModalOpen(true);
+      console.error("Error updating history:", err);
     }
   };
 
-  const handleDeleteCategory = async (id: number) => {
-    const confirmed = window.confirm('Are you sure you want to delete this product category?');
-    if (confirmed) {
+  const handleDeleteHistory = async (historyId: number) => {
+    const confirmDelete = window.confirm("Are you sure you want to delete this history?");
+    if (confirmDelete) {
       try {
-        await productCategoryService.deleteProductCategory(id);
-        setSuccessMessage('Product category deleted successfully');
+        await historyService.deleteHistory(historyId);
+        await fetchHistories();
+        setSuccessMessage("History deleted successfully");
         setIsSuccessModalOpen(true);
-        await fetchCategories();
-      } catch (err: any) {
-        setError(err.message || 'Failed to delete product category');
+      } catch (err) {
+        setError("Failed to delete history");
         setIsErrorModalOpen(true);
+        console.error("Error deleting history:", err);
       }
     }
   };
 
-  const filteredCategories = categories.filter((category) =>
-    category.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredHistories = histories.filter((h) =>
+    h.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -91,23 +111,23 @@ const ProductCategoryManagementPage = () => {
         <div className="flex-1 p-6 mt-10">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold text-gray-800">Product Category Management</h1>
+              <h1 className="text-3xl font-bold text-gray-800">History Management</h1>
               <button
                 onClick={() => {
                   setIsModalOpen(true);
-                  setEditingCategory(null);
-                  setNewCategory({ name: '' });
+                  setEditingHistory(null);
+                  setNewHistory({ description: "" });
                 }}
                 className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
               >
-                Add New Category
+                Add New History
               </button>
             </div>
 
             <div className="mb-6">
               <input
                 type="text"
-                placeholder="Search categories..."
+                placeholder="Search histories..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-4 py-2 border rounded-lg"
@@ -119,68 +139,39 @@ const ProductCategoryManagementPage = () => {
                 <thead className="bg-gray-100">
                   <tr>
                     <th className="px-4 py-3 text-left">ID</th>
-                    <th className="px-4 py-3 text-left">Name</th>
+                    <th className="px-4 py-3 text-left">Description</th>
                     <th className="px-4 py-3 text-left">Created At</th>
                     <th className="px-4 py-3 text-left">Updated At</th>
                     <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredCategories.map((category) => (
-                    <tr key={category.id} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-3">{category.id}</td>
+                  {filteredHistories.map((h) => (
+                    <tr key={h.id} className="border-b hover:bg-gray-50">
+                      <td className="px-4 py-3">{h.id}</td>
+                      <td className="px-4 py-3">{h.description}</td>
                       <td className="px-4 py-3">
-                        {editingCategory?.id === category.id ? (
-                          <input
-                            type="text"
-                            value={editingCategory.name}
-                            onChange={(e) =>
-                              setEditingCategory({ id: editingCategory.id, name: e.target.value })
-                            }
-                            className="border px-2 py-1 rounded-lg w-full"
-                          />
-                        ) : (
-                          category.name
-                        )}
+                        {new Date(h.created_at).toLocaleDateString()}
                       </td>
                       <td className="px-4 py-3">
-                        {new Date(category.created_at).toLocaleString()}
-                      </td>
-                      <td className="px-4 py-3">
-                        {new Date(category.updated_at).toLocaleString()}
+                        {new Date(h.updated_at).toLocaleDateString()}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        {editingCategory?.id === category.id ? (
-                          <>
-                            <button
-                              onClick={handleUpdateCategory}
-                              className="text-green-500 hover:underline"
-                            >
-                              Save
-                            </button>
-                            <button
-                              onClick={() => setEditingCategory(null)}
-                              className="ml-4 text-red-500 hover:underline"
-                            >
-                              Cancel
-                            </button>
-                          </>
-                        ) : (
-                          <>
-                            <button
-                              onClick={() => setEditingCategory({ id: category.id, name: category.name })}
-                              className="text-blue-500 hover:underline"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDeleteCategory(category.id)}
-                              className="ml-4 text-red-500 hover:underline"
-                            >
-                              Delete
-                            </button>
-                          </>
-                        )}
+                        <button
+                          onClick={() => {
+                            setEditingHistory(h);
+                            setIsModalOpen(true);
+                          }}
+                          className="text-blue-500 hover:underline"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeleteHistory(h.id)}
+                          className="ml-4 text-red-500 hover:underline"
+                        >
+                          Delete
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -192,33 +183,34 @@ const ProductCategoryManagementPage = () => {
               <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
                 <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full">
                   <h2 className="text-2xl font-bold mb-6">
-                    {editingCategory ? 'Edit Product Category' : 'Add New Product Category'}
+                    {editingHistory ? "Edit History" : "Add New History"}
                   </h2>
                   <div className="space-y-4">
-                    <input
-                      type="text"
-                      value={editingCategory ? editingCategory.name : newCategory.name}
-                      onChange={(e) =>
-                        editingCategory
-                          ? setEditingCategory({ id: editingCategory.id, name: e.target.value })
-                          : setNewCategory({ name: e.target.value })
-                      }
-                      placeholder="Enter category name..."
-                      className="border px-4 py-3 rounded-lg w-full"
+                    <textarea
+                      value={editingHistory ? editingHistory.description : newHistory.description}
+                      onChange={(e) => {
+                        if (editingHistory) {
+                          setEditingHistory({ ...editingHistory, description: e.target.value });
+                        } else {
+                          setNewHistory({ description: e.target.value });
+                        }
+                      }}
+                      placeholder="Enter history description..."
+                      className="border px-4 py-3 rounded-lg w-full h-32 resize-y"
                     />
                   </div>
                   <div className="flex justify-end mt-6">
                     <button
                       onClick={() => {
-                        if (editingCategory) {
-                          handleUpdateCategory();
+                        if (editingHistory) {
+                          handleUpdateHistory();
                         } else {
-                          handleCreateCategory();
+                          handleCreateHistory();
                         }
                       }}
                       className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
                     >
-                      {editingCategory ? 'Update' : 'Create'}
+                      {editingHistory ? "Update" : "Create"}
                     </button>
                     <button
                       onClick={() => setIsModalOpen(false)}
@@ -267,4 +259,4 @@ const ProductCategoryManagementPage = () => {
   );
 };
 
-export default ProductCategoryManagementPage;
+export default HistoryManagement;

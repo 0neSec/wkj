@@ -65,11 +65,8 @@ const Sidebar = () => {
         { label: "Task", path: "/dashboard/content/task" },
         { label: "Fungsi", path: "/dashboard/content/funtion" },
         { label: "Visi Misi", path: "#" },
-        { label: "Sejarah", path: "#" },
+        { label: "Sejarah", path: "/dashboard/content/sejarah" },
         { label: "Struktur Organisasi", path: "#" },
-        // { label: "Visi Misi", path: "/dasboard/content/visi-misi" },
-        // { label: "Sejarah", path: "/dasboard/content/sejarah" },
-        // { label: "Struktur Organisasi", path: "/dasboard/content/struktur-organisasi" },
       ],
     },
     {

@@ -37,21 +37,21 @@ class HistoryService {
         try {
             const response = await this.axiosInstance.post<{
                 message: string;
-                historyContent: HistoryContent;
+                HistoryContent: HistoryContent;
             }>('/admin/history-content', data);
-            return response.data.historyContent;
+            return response.data.HistoryContent;
         } catch (error) {
             this.handleError(error, 'Failed to create history content');
             return undefined;
         }
     }
 
-    async getHistory(): Promise<HistoryContent[]> {
+    async getHistories(): Promise<HistoryContent[]> {
         try {
             const response = await this.axiosInstance.get<{
-                historyContent: HistoryContent[];
+                HistoryContent: HistoryContent[];
             }>('/history-content');
-            return response.data.historyContent;
+            return response.data.HistoryContent;
         } catch (error) {
             this.handleError(error, 'Failed to retrieve history content');
             return [];
@@ -61,9 +61,9 @@ class HistoryService {
     async getHistoryById(id: number): Promise<HistoryContent | undefined> {
         try {
             const response = await this.axiosInstance.get<{
-                historyContent: HistoryContent;
+                HistoryContent: HistoryContent;
             }>(`/history-content/${id}`);
-            return response.data.historyContent;
+            return response.data.HistoryContent;
         } catch (error) {
             this.handleError(error, 'Failed to retrieve history content');
             return undefined;
@@ -74,13 +74,14 @@ class HistoryService {
         try {
             const response = await this.axiosInstance.put<{
                 message: string;
-                historyContent: HistoryContent;
+                HistoryContent: HistoryContent;
             }>(`/admin/history-content/${data.id}`, data);
-            return response.data.historyContent;
+            
+            return response.data.HistoryContent;
         } catch (error) {
             if (error instanceof AxiosError) {
                 if (error.response?.status === 409) {
-                    throw new Error("Conflict: A history record with this data already exists.");
+                    throw new Error("Conflict: A history with this data already exists.");
                 }
             }
             this.handleError(error, 'Failed to update history content');

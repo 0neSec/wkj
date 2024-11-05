@@ -39,34 +39,20 @@ const services = [
   },
   {
     id: 6,
-    title: "Pengolahan Pasca Panen Tanaman Obat",
-    description: "Fasilitas pengolahan tanaman obat",
-    icon: "🌱",
-    href: "pengolahan-tanaman"
-  },
-  {
-    id: 7,
-    title: "Penelitian Saintifikasi Jamu",
-    description: "Riset dan pengembangan jamu",
-    icon: "📚",
-    href: "penelitian-jamu"
-  },
-  {
-    id: 8,
     title: "Wisata Edukasi Tanaman Obat",
     description: "Program wisata edukasi berbasis tanaman obat",
     icon: "🌺",
     href: "wisata-edukasi"
   },
   {
-    id: 9,
+    id: 7,
     title: "Pelatihan & Workshop Pemanfaatan Tanaman Obat",
     description: "Program pelatihan pengolahan tanaman obat",
     icon: "👨‍🏫",
     href: "pelatihan-workshop"
   },
   {
-    id: 10,
+    id: 8,
     title: "Produk dan Layanan Bahan Baku Tanaman Obat",
     description: "Penyediaan bahan baku tanaman obat berkualitas",
     icon: "🌾",

@@ -172,14 +172,10 @@ const DashboardProduct = () => {
       return;
     }
     try {
-      console.log(formData.product_category_id);
-      console.log(formData.utilization);
-      
-
       const createData = {
         ...formData,
         image: selectedFile,
-        product_category_id: formData.product_category_id,
+        product_category_id: formData.product_category_id ,
       } as CreateProductData;
       console.log("data:", createData);
 

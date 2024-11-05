@@ -31,6 +31,7 @@ import DashboardProfile from "./pages/Dashboard/admin/profile";
 import DashboardTask from "./pages/Dashboard/admin/profile/taskTentang";
 import FunctionManagement from "./pages/Dashboard/admin/profile/fungsiTentang";
 import RegisterPage from "./pages/Auth/register";
+import HistoryManagement from "./pages/Dashboard/admin/profile/HistoryTentang";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -157,6 +158,14 @@ function App() {
           element={
             <ProtectedRoute requiredRole="admin">
               <FunctionManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/content/sejarah"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <HistoryManagement/>
             </ProtectedRoute>
           }
         />
