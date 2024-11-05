@@ -28,7 +28,7 @@ import DasboardServiceCategoryPage from "./pages/Dashboard/admin/Layanan/Layanan
 import DashboardServicePage from "./pages/Dashboard/admin/Layanan/LayananList";
 import ProductDetail from "./component/includes/product/Detail";
 import DashboardProfile from "./pages/Dashboard/admin/profile";
-import DashboardTask from "./pages/Dashboard/admin/profile/task";
+import DashboardTask from "./pages/Dashboard/admin/profile/taskTentang";
 import FunctionManagement from "./pages/Dashboard/admin/profile/fungsiTentang";
 import RegisterPage from "./pages/Auth/register";
 

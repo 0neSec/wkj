@@ -89,46 +89,41 @@ class ProductService {
         });
     }
 
-async createProduct(data: CreateProductData): Promise<Product | undefined> {
-    try {
-        const productData = {
-            name: data.name,
-            latin_name: data.latin_name,
-            synonym: data.synonym,
-            familia: data.familia,
-            part_used: data.part_used,
-            method_of_reproduction: data.method_of_reproduction,
-            harvest_age: data.harvest_age,
-            morphology: data.morphology,
-            area_name: data.area_name,
-            efficacy: data.efficacy,
-            utilization: JSON.stringify(data.utilization || []), // Ensure utilization is a JSON string
-            composition: JSON.stringify({
-                primary: data.composition?.[0] || '',
-                secondary: data.composition?.[1] || ''
-            }), // Create composition as a JSON object
-            image_url: null, // Set image_url to null or adjust based on your requirements
-            research_results: data.research_results,
-            description: data.description,
-            price: data.price,
-            unit_type: data.unit_type,
-            product_category_id: data.product_category_id,
-        };
-
-        const response = await this.axiosInstance.post<{
-            message: string;
-            Product: Product;
-        }>('/admin/product', productData, {
-            headers: { 'Content-Type': 'application/json' },
-        });
-        console.log('Product created:', response);
-
-        return response.data.Product;
-    } catch (error) {
-        this.handleError(error, 'Failed to create product');
-        return undefined;
+    async createProduct(data: CreateProductData): Promise<Product | undefined> {
+        try {
+            const formData = new FormData();
+            
+            // Handle all fields including special cases for utilization and composition
+            Object.entries(data).forEach(([key, value]) => {
+                if (key === 'utilization') {
+                    if (value) {
+                        formData.append(key, JSON.stringify({ values: value }));
+                    }
+                } else if (key === 'composition') {
+                    if (value) {
+                        formData.append(key, JSON.stringify({ values: value }));
+                    }
+                } else if (key === 'image') {
+                    formData.append('image_url', value);
+                } else if (value !== undefined && value !== null) {
+                    formData.append(key, value.toString());
+                }
+            });
+    
+            const response = await this.axiosInstance.post<{
+                message: string;
+                Product: Product;
+            }>('/admin/product', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+    
+            console.log('Product created:', response);
+            return response.data.Product;
+        } catch (error) {
+            this.handleError(error, 'Failed to create product');
+            return undefined;
+        }
     }
-}
 
 
     async getProduct(id: string): Promise<Product | undefined> {

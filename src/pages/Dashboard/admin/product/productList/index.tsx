@@ -47,7 +47,7 @@ const DashboardProduct = () => {
     const fetchInitialData = async () => {
       try {
         const productsData = await productService.getAllProducts();
-        const categoriesData = await productCategoryService.getAllCategories();
+        const categoriesData = await productCategoryService.getProductCategories();
 
         if (Array.isArray(categoriesData)) {
           setCategories(categoriesData);
@@ -78,7 +78,7 @@ const DashboardProduct = () => {
     try {
       const [productsResponse, categoriesResponse] = await Promise.all([
         productService.getAllProductsWithCategories(),
-        productCategoryService.getAllCategories(),
+        productCategoryService.getProductCategories(),
       ]);
 
       const productsData = Array.isArray(productsResponse)

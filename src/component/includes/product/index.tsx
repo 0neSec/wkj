@@ -7,10 +7,12 @@ import { Search } from "lucide-react";
 
 interface ProductPageProps {
   showSearchAndFilter?: boolean;
+  limit?: number; // New prop to limit number of products
 }
 
 const ProductPage: React.FC<ProductPageProps> = ({
   showSearchAndFilter = true,
+  limit,
 }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -26,7 +28,10 @@ const ProductPage: React.FC<ProductPageProps> = ({
         setLoading(true);
         const productList = await productService.getAllProducts();
         setProducts(productList);
-        setFilteredProducts(productList);
+        
+        // Apply limit if specified
+        const limitedProducts = limit ? productList.slice(0, limit) : productList;
+        setFilteredProducts(limitedProducts);
 
         const uniqueCategories = Array.from(
           new Set(
@@ -48,7 +53,7 @@ const ProductPage: React.FC<ProductPageProps> = ({
     };
 
     fetchProducts();
-  }, []);
+  }, [limit]);
 
   const filterProducts = (term: string, category: string) => {
     let filtered = products;
@@ -82,6 +87,8 @@ const ProductPage: React.FC<ProductPageProps> = ({
       }
     });
 
+    // Apply limit if specified
+    filtered = limit ? filtered.slice(0, limit) : filtered;
     setFilteredProducts(filtered);
   };
 
@@ -103,14 +110,6 @@ const ProductPage: React.FC<ProductPageProps> = ({
     const value = event.target.value;
     setSortBy(value);
     filterProducts(searchTerm, selectedCategory);
-  };
-
-  const handleMessageClick = (product: Product) => {
-    console.log(`Message clicked for product: ${product.name}`);
-  };
-
-  const handleDetailsClick = (product: Product) => {
-    console.log(`Details clicked for product: ${product.name}`);
   };
 
   return (

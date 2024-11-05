@@ -1,110 +1,115 @@
 import axios, { AxiosError, AxiosInstance } from 'axios';
 
-// Common types
 export interface ProductCategory {
-  id: number;
-  name: string;
+    id: number;
+    name: string;
+    created_at: string;
+    updated_at: string;
 }
 
-// Data transfer types
-export interface CreateCategoryData {
-  name: string;
+export interface CreateProductCategoryData {
+    name: string;
 }
 
-export interface UpdateCategoryData {
-  id: string;
-  name?: string;
+export interface UpdateProductCategoryData {
+    id: number;
+    name?: string;
 }
 
-export interface CreateProductData {
-  name: string;
-  description: string;
-  price: number;
-  image: File;
-  product_category_id: string;
-}
+class ProductCategoryService {
+    private axiosInstance: AxiosInstance;
 
-export interface UpdateProductData {
-  id: string;
-  name?: string;
-  description?: string;
-  price?: number;
-  image?: File;
-  product_category_id?: string;
-}
-
-// Base service class with common functionality
-abstract class BaseService {
-  protected axiosInstance: AxiosInstance;
-  
-  constructor() {
-    const storageType = localStorage.getItem('storageType');
-    const storage = storageType === 'local' ? localStorage : sessionStorage;
-    const token = storage.getItem('token');
-
-    this.axiosInstance = axios.create({
-      baseURL: process.env.REACT_APP_API_URL,
-      timeout: 10000,
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-    });
-  }
-
-  protected handleAxiosError(error: unknown, defaultMessage: string): never {
-    if (error instanceof AxiosError) {
-      throw error.response?.data || { error: defaultMessage };
+    constructor() {
+        const storageType = localStorage.getItem('storageType');
+        const storage = storageType === 'local' ? localStorage : sessionStorage;
+        const token = storage.getItem('token');
+        console.log(token);
+        
+        
+        this.axiosInstance = axios.create({
+            baseURL: process.env.REACT_APP_API_URL,
+            timeout: 10000,
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
     }
-    throw error;
-  }
-}
 
-// Product Category Service
-class ProductCategoryService extends BaseService {
-  async createCategory(data: CreateCategoryData): Promise<ProductCategory> {
-    try {
-      const response = await this.axiosInstance.post<ProductCategory>('/admin/product-category', data);
-      return response.data;
-    } catch (error) {
-      this.handleAxiosError(error, 'Failed to create category. Please try again.');
+    async createProductCategory(data: CreateProductCategoryData): Promise<ProductCategory | undefined> {
+        try {
+            const response = await this.axiosInstance.post<{
+                message: string;
+                ProductCategory: ProductCategory;
+            }>('/admin/product-category', data);
+            return response.data.ProductCategory;
+        } catch (error) {
+            this.handleError(error, 'Failed to create product category');
+            return undefined;
+        }
     }
-  }
 
-  async getCategory(id: string): Promise<ProductCategory> {
-    try {
-      const response = await this.axiosInstance.get<ProductCategory>(`/admin/product-category/${id}`);
-      return response.data;
-    } catch (error) {
-      this.handleAxiosError(error, 'Failed to retrieve category. Please try again.');
+    async getProductCategories(): Promise<ProductCategory[]> {
+        try {
+            const response = await this.axiosInstance.get<{
+                ProductCategory: ProductCategory[];
+            }>('/product-category');
+            return response.data.ProductCategory;
+        } catch (error) {
+            this.handleError(error, 'Failed to retrieve product categories');
+            return [];
+        }
     }
-  }
 
-  async updateCategory(data: UpdateCategoryData): Promise<ProductCategory> {
-    try {
-      const response = await this.axiosInstance.put<ProductCategory>(`/admin/product-category/${data.id}`, data);
-      return response.data;
-    } catch (error) {
-      this.handleAxiosError(error, 'Failed to update category. Please try again.');
+    async getProductCategoryById(id: number): Promise<ProductCategory | undefined> {
+        try {
+            const response = await this.axiosInstance.get<{
+                ProductCategory: ProductCategory;
+            }>(`/product-category/${id}`);
+            return response.data.ProductCategory;
+        } catch (error) {
+            this.handleError(error, 'Failed to retrieve product category');
+            return undefined;
+        }
     }
-  }
 
-  async deleteCategory(id: string): Promise<void> {
-    try {
-      await this.axiosInstance.delete(`/admin/product-category/${id}`);
-    } catch (error) {
-      this.handleAxiosError(error, 'Failed to delete category. Please try again.');
+    async updateProductCategory(data: UpdateProductCategoryData): Promise<ProductCategory | undefined> {
+        try {
+            const response = await this.axiosInstance.put<{
+                message: string;
+                ProductCategory: ProductCategory;
+            }>(`/admin/product-category/${data.id}`, data);
+            
+            return response.data.ProductCategory;
+        } catch (error) {
+            if (error instanceof AxiosError) {
+                if (error.response?.status === 409) {
+                    throw new Error("Conflict: A product category with this name already exists.");
+                }
+            }
+            this.handleError(error, 'Failed to update product category');
+            return undefined;
+        }
     }
-  }
 
-  async getAllCategories(): Promise<ProductCategory[]> {
-    try {
-      const response = await this.axiosInstance.get<ProductCategory[]>('/product-category');
-      return response.data; // Adjust based on actual API response
-    } catch (error) {
-      this.handleAxiosError(error, 'Failed to retrieve categories. Please try again.');
+    async deleteProductCategory(id: number): Promise<void> {
+        try {
+            await this.axiosInstance.delete(`/admin/product-category/${id}`);
+        } catch (error) {
+            if (error instanceof AxiosError && error.response?.status === 400) {
+                throw new Error("Cannot delete product category: There are products associated with this category.");
+            }
+            this.handleError(error, 'Failed to delete product category');
+        }
     }
-  }
+
+    private handleError(error: unknown, message: string) {
+        if (error instanceof AxiosError) {
+            console.error(`${message}:`, error.response?.data);
+            throw error.response?.data || { error: message };
+        }
+        console.error(message, error);
+        throw { error: message };
+    }
 }
 
 export const productCategoryService = new ProductCategoryService();

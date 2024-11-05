@@ -19,24 +19,13 @@ function Home() {
           <div className="py-8 mt-5">
             <div className="container mx-auto px-4">
               <h1 className="text-3xl font-bold text-gray-900 text-center">
-                Produk
+                Layanan Produk
               </h1>
               <p className="mt-2 text-gray-600 text-center">
                 Temukan produk herbal terbaik untuk kesehatan Anda
               </p>
               <div className="p-10">
-              <ProductPage showSearchAndFilter={false} />
-              </div>
-            </div>
-          </div>
-          <div className="py-8 mt-5">
-            <div className="container mx-auto px-4">
-              <h1 className="text-3xl font-bold text-gray-900 text-center">
-                Layanan Wisata Kesehatan Jamu
-              </h1>
-              
-              <div className="mt-8">
-                <ServiceGrid />
+              <ProductPage showSearchAndFilter={false}   limit={6}/>
               </div>
             </div>
           </div>
@@ -54,14 +43,15 @@ function Home() {
           <div className="py-8 mt-5">
             <div className="container mx-auto px-4">
               <h1 className="text-3xl font-bold text-gray-900 text-center">
-                Katalog Produk
+                Layanan Wisata Kesehatan Jamu
               </h1>
-              
+              <p className="text-center">Temukan pelayanan untuk kesehatan</p>
               <div className="mt-8">
-                <CatalogGrid />
+                <ServiceGrid />
               </div>
             </div>
           </div>
+
           <div className="py-8 mt-5">
             <div className="container mx-auto px-4">
               <h1 className="text-3xl font-bold text-gray-900 text-center">
@@ -73,8 +63,6 @@ function Home() {
               </div>
             </div>
           </div>
-          {/* <Blog isHomePage={true} /> */}
-          {/* <Faq /> */}
         </div>
       </main>
       <Footer />

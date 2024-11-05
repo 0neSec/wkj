@@ -25,7 +25,7 @@ const CategorySidebar: React.FC<CategorySidebarProps> = ({
     const fetchCategories = async () => {
       try {
         setLoading(true);
-        const data = await productCategoryService.getAllCategories();
+        const data = await productCategoryService.getProductCategories();
         console.log(data);
         setCategories(data);
       } catch (err) {

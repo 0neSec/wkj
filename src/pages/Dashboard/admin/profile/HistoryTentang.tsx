@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import {  CreateProductCategoryData, ProductCategory, productCategoryService, UpdateProductCategoryData } from '../../../../../services/product/product-category.service';
-import Navbar from '../../../../../component/includes/navbar';
-import Sidebar from '../../../../../component/includes/sidebar';
+import Navbar from '../../../../component/includes/navbar';
+import Sidebar from '../../../../component/includes/sidebar';
+import { CreateProductCategoryData, ProductCategory, productCategoryService, UpdateProductCategoryData } from '../../../../services/product/product-category.service';
 
-const ProductCategoryManagementPage: React.FC = () => {
+const ProductCategoryManagementPage = () => {
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [newCategory, setNewCategory] = useState<CreateProductCategoryData>({ name: '' });
   const [editingCategory, setEditingCategory] = useState<UpdateProductCategoryData | null>(null);
-  const [searchTerm, setSearchTerm] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [isErrorModalOpen, setIsErrorModalOpen] = useState<boolean>(false);
+  const [isSuccessModalOpen, setIsSuccessModalOpen] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   useEffect(() => {
     fetchCategories();
@@ -18,47 +20,31 @@ const ProductCategoryManagementPage: React.FC = () => {
 
   const fetchCategories = async () => {
     try {
-      const categoriesData = await productCategoryService.getProductCategories();
-      // Add type checking and ensure we're working with an array
-      if (Array.isArray(categoriesData)) {
-        setCategories(categoriesData);
-      } else if (categoriesData && typeof categoriesData === 'object') {
-        // If the data is an object but not an array, it might be nested
-        // Check common API response patterns
-        const categoryArray = (categoriesData as any).data || 
-                            (categoriesData as any).categories || 
-                            Object.values(categoriesData);
-        if (Array.isArray(categoryArray)) {
-          setCategories(categoryArray);
-        } else {
-          console.error("Received data is not in the expected format:", categoriesData);
-          setCategories([]);
-        }
-      } else {
-        console.error("Received data is not in the expected format:", categoriesData);
-        setCategories([]);
-      }
+      const categories = await productCategoryService.getProductCategories();
+      setCategories(categories);
     } catch (err) {
-      console.error("Error fetching categories:", err);
-      setCategories([]);
+      setError('Failed to fetch product categories');
+      setIsErrorModalOpen(true);
     }
   };
-  
 
   const handleCreateCategory = async () => {
     if (!newCategory.name.trim()) {
       setError('Category name cannot be empty');
+      setIsErrorModalOpen(true);
       return;
     }
 
     try {
       await productCategoryService.createProductCategory(newCategory);
       setNewCategory({ name: '' });
-      setSuccessMessage('Category created successfully');
+      setSuccessMessage('Product category created successfully');
+      setIsSuccessModalOpen(true);
       await fetchCategories();
       setIsModalOpen(false);
-    } catch (error) {
-      setError('Failed to create category');
+    } catch (err) {
+      setError('Failed to create product category');
+      setIsErrorModalOpen(true);
     }
   };
 
@@ -68,32 +54,34 @@ const ProductCategoryManagementPage: React.FC = () => {
     try {
       await productCategoryService.updateProductCategory(editingCategory);
       setEditingCategory(null);
-      setSuccessMessage('Category updated successfully');
+      setSuccessMessage('Product category updated successfully');
+      setIsSuccessModalOpen(true);
       await fetchCategories();
       setIsModalOpen(false);
-    } catch (error) {
-      setError('Failed to update category');
+    } catch (err) {
+      setError('Failed to update product category');
+      setIsErrorModalOpen(true);
     }
   };
 
   const handleDeleteCategory = async (id: number) => {
-    const confirmed = window.confirm('Are you sure you want to delete this category?');
+    const confirmed = window.confirm('Are you sure you want to delete this product category?');
     if (confirmed) {
       try {
         await productCategoryService.deleteProductCategory(id);
-        setSuccessMessage('Category deleted successfully');
+        setSuccessMessage('Product category deleted successfully');
+        setIsSuccessModalOpen(true);
         await fetchCategories();
-      } catch (error) {
-        setError('Failed to delete category');
+      } catch (err: any) {
+        setError(err.message || 'Failed to delete product category');
+        setIsErrorModalOpen(true);
       }
     }
   };
 
-  const filteredCategories = Array.isArray(categories) 
-  ? categories.filter((category) =>
-      category.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-  : [];
+  const filteredCategories = categories.filter((category) =>
+    category.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -132,6 +120,8 @@ const ProductCategoryManagementPage: React.FC = () => {
                   <tr>
                     <th className="px-4 py-3 text-left">ID</th>
                     <th className="px-4 py-3 text-left">Name</th>
+                    <th className="px-4 py-3 text-left">Created At</th>
+                    <th className="px-4 py-3 text-left">Updated At</th>
                     <th className="px-4 py-3 text-right">Actions</th>
                   </tr>
                 </thead>
@@ -152,6 +142,12 @@ const ProductCategoryManagementPage: React.FC = () => {
                         ) : (
                           category.name
                         )}
+                      </td>
+                      <td className="px-4 py-3">
+                        {new Date(category.created_at).toLocaleString()}
+                      </td>
+                      <td className="px-4 py-3">
+                        {new Date(category.updated_at).toLocaleString()}
                       </td>
                       <td className="px-4 py-3 text-right">
                         {editingCategory?.id === category.id ? (
@@ -196,19 +192,21 @@ const ProductCategoryManagementPage: React.FC = () => {
               <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
                 <div className="bg-white p-8 rounded-lg shadow-lg max-w-2xl w-full">
                   <h2 className="text-2xl font-bold mb-6">
-                    {editingCategory ? 'Edit Category' : 'Add New Category'}
+                    {editingCategory ? 'Edit Product Category' : 'Add New Product Category'}
                   </h2>
-                  <input
-                    type="text"
-                    value={editingCategory ? editingCategory.name : newCategory.name}
-                    onChange={(e) =>
-                      editingCategory
-                        ? setEditingCategory({ id: editingCategory.id, name: e.target.value })
-                        : setNewCategory({ name: e.target.value })
-                    }
-                    placeholder="Enter category name..."
-                    className="border px-4 py-2 rounded-lg w-full"
-                  />
+                  <div className="space-y-4">
+                    <input
+                      type="text"
+                      value={editingCategory ? editingCategory.name : newCategory.name}
+                      onChange={(e) =>
+                        editingCategory
+                          ? setEditingCategory({ id: editingCategory.id, name: e.target.value })
+                          : setNewCategory({ name: e.target.value })
+                      }
+                      placeholder="Enter category name..."
+                      className="border px-4 py-3 rounded-lg w-full"
+                    />
+                  </div>
                   <div className="flex justify-end mt-6">
                     <button
                       onClick={() => {
@@ -233,14 +231,33 @@ const ProductCategoryManagementPage: React.FC = () => {
               </div>
             )}
 
-            {successMessage && (
-              <div className="fixed bottom-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg">
-                {successMessage}
+            {isSuccessModalOpen && (
+              <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+                  <h2 className="text-xl font-bold mb-4">Success</h2>
+                  <p>{successMessage}</p>
+                  <button
+                    onClick={() => setIsSuccessModalOpen(false)}
+                    className="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg"
+                  >
+                    OK
+                  </button>
+                </div>
               </div>
             )}
-            {error && (
-              <div className="fixed bottom-4 right-4 bg-red-500 text-white p-4 rounded-lg shadow-lg">
-                {error}
+
+            {isErrorModalOpen && (
+              <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+                <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full">
+                  <h2 className="text-xl font-bold mb-4">Error</h2>
+                  <p>{error}</p>
+                  <button
+                    onClick={() => setIsErrorModalOpen(false)}
+                    className="mt-4 bg-red-500 text-white px-4 py-2 rounded-lg"
+                  >
+                    OK
+                  </button>
+                </div>
               </div>
             )}
           </div>
