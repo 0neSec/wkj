@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import Navbar from "../../../../../component/includes/navbar";
 import Sidebar from "../../../../../component/includes/sidebar";
@@ -47,8 +48,7 @@ const DashboardProduct = () => {
     const fetchInitialData = async () => {
       try {
         const productsData = await productService.getAllProducts();
-        const categoriesData =
-          await productCategoryService.getProductCategories();
+        const categoriesData = await productCategoryService.getProductCategories();
 
         if (Array.isArray(categoriesData)) {
           setCategories(categoriesData);
@@ -172,16 +172,17 @@ const DashboardProduct = () => {
       alert("Please select an image");
       return;
     }
-
     try {
+      console.log(formData.product_category_id);
+      console.log(formData.utilization);
+      
+
       const createData = {
         ...formData,
         image: selectedFile,
-        // Ensure product_category_id is properly typed and passed
         product_category_id: formData.product_category_id,
       } as CreateProductData;
-
-      console.log("Sending data:", createData);
+      console.log("data:", createData);
 
       await productService.createProduct(createData);
       resetForm();
@@ -205,7 +206,7 @@ const DashboardProduct = () => {
       };
 
       if (selectedFile) {
-        updateData.image = selectedFile;
+        updateData.image = selectedFile; 
       }
 
       await productService.updateProduct(updateData);
@@ -297,9 +298,7 @@ const DashboardProduct = () => {
         <div className="flex-1 p-4 md:p-6 mt-10">
           <div className="max-w-7xl mx-auto">
             <div className="flex justify-between items-center mb-6">
-              <h1 className="text-3xl font-bold text-gray-800">
-                Daftar Produk
-              </h1>
+              <h1 className="text-3xl font-bold text-gray-800">Daftar Produk</h1>
               <button
                 onClick={() => {
                   resetForm();
@@ -334,9 +333,9 @@ const DashboardProduct = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredProducts.map((product) => (
+                  {filteredProducts.map((product, index) => (
                     <tr key={product.id} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-3">{product.id}</td>
+                      <td className="px-4 py-3">{index + 1}</td>
                       <td className="px-4 py-3">{product.name}</td>
                       <td className="px-4 py-3">{product.latin_name}</td>
                       <td className="px-4 py-3">
@@ -383,7 +382,9 @@ const DashboardProduct = () => {
                   {/* Basic Information */}
                   <div className="grid grid-cols-2 gap-4">
                     <div className="mb-4">
-                      <label className="block text-gray-700">Nama Produk</label>
+                      <label className="block text-gray-700">
+                        Nama Produk
+                      </label>
                       <input
                         type="text"
                         name="name"
@@ -430,9 +431,7 @@ const DashboardProduct = () => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div className="mb-4">
-                      <label className="block text-gray-700">
-                        Bagian yang digunakan
-                      </label>
+                      <label className="block text-gray-700">Bagian yang digunakan</label>
                       <input
                         type="text"
                         name="part_used"
@@ -527,7 +526,9 @@ const DashboardProduct = () => {
                   </div>
 
                   <div className="mb-4">
-                    <label className="block text-gray-700">Hasil Riset</label>
+                    <label className="block text-gray-700">
+                      Hasil Riset
+                    </label>
                     <textarea
                       name="research_results"
                       value={formData.research_results}
@@ -578,7 +579,7 @@ const DashboardProduct = () => {
                         onChange={handleInputChange}
                         className="border rounded-lg w-full p-2"
                       >
-                        <option value="">Pilih Kategori</option>
+                        <option value="" aria-required>Pilih Kategori</option>
                         {categories.map((category) => (
                           <option key={category.id} value={category.id}>
                             {category.name}

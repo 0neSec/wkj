@@ -303,9 +303,9 @@ export default function Navbar() {
             />
           </a>
 
-          <div className="hidden lg:flex items-center justify-center flex-1 gap-8 ml-20">
+          <div className="hidden lg:flex items-center justify-center flex-1 gap-8 ml-24">
             {typedMenuData.menuItems.map((item) => (
-              <div key={item} className="relative ml-10">
+              <div key={item} className="relative ml-5">
                 {renderDesktopMenuItem(item)}
               </div>
             ))}
