@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { FcGoogle } from 'react-icons/fc';
-import { FaFacebook } from 'react-icons/fa'
-import { useNavigate, useLocation } from 'react-router-dom';
+import { FaFacebook } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import { authService } from '../../../services/auth.service';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -15,40 +14,43 @@ export default function RegisterPage() {
     username: '',
     email: '',
     password: '',
-    rememberMe: false
+    confirmPassword: '',
+    agreeToTerms: false
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-  
+
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Password tidak cocok');
+      return;
+    }
+
+    // Validate terms agreement
+    if (!formData.agreeToTerms) {
+      setError('Anda harus menyetujui syarat dan ketentuan');
+      return;
+    }
+
     try {
       setIsLoading(true);
-      const response = await authService.login({
+      const response = await authService.register({
+        username: formData.username,
         email: formData.email,
         password: formData.password
       });
-  
-      // Handle "Remember me" functionality
-      if (formData.rememberMe) {
-        localStorage.setItem('rememberMe', 'true');
-      } else {
-        localStorage.removeItem('rememberMe');
-      }
-  
-      // Display welcome message with username
-      const username = response.username || 'User';
-      console.log(`Welcome back, ${username}!`);
-  
-      // Redirect based on user role
-      const redirectTo = response.role === 'admin' 
-        ? '/dashboard' 
-        : (location.state?.from?.pathname || '/');
-      
-      navigate(redirectTo, { replace: true });
-  
+
+      // Registration successful, redirect to login with success message
+      navigate('/login', {
+        state: {
+          message: 'Registrasi berhasil! Silakan masuk dengan akun baru Anda.'
+        }
+      });
+
     } catch (err: any) {
-      setError(err.error || 'Email atau password salah');
+      setError(err.message || 'Registrasi gagal. Silakan coba lagi.');
     } finally {
       setIsLoading(false);
     }
@@ -92,34 +94,26 @@ export default function RegisterPage() {
             </div>
           )}
 
-          {/* Success Message from Registration */}
-          {location.state?.message && (
-            <div className="mb-4 p-2 text-center text-green-600 text-sm bg-green-50 rounded-md">
-              {location.state.message}
-            </div>
-          )}
-
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700">
                 Username
               </label>
               <div className="mt-1">
                 <input
                   id="username"
                   name="username"
-                  type="username"
+                  type="text"
                   autoComplete="username"
                   required
                   value={formData.username}
                   onChange={handleChange}
                   className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="username"
+                  placeholder="Username"
                   disabled={isLoading}
                 />
               </div>
             </div>
-
 
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
@@ -150,7 +144,7 @@ export default function RegisterPage() {
                   id="password"
                   name="password"
                   type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
+                  autoComplete="new-password"
                   required
                   value={formData.password}
                   onChange={handleChange}
@@ -171,29 +165,47 @@ export default function RegisterPage() {
                   )}
                 </button>
               </div>
+              <p className="mt-1 text-xs text-gray-500">
+                Minimal 8 karakter, mengandung huruf besar, huruf kecil, angka, dan karakter khusus
+              </p>
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
+            <div>
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+                Konfirmasi Password
+              </label>
+              <div className="mt-1 relative">
                 <input
-                  id="rememberMe"
-                  name="rememberMe"
-                  type="checkbox"
-                  checked={formData.rememberMe}
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="new-password"
+                  required
+                  value={formData.confirmPassword}
                   onChange={handleChange}
-                  className="h-4 w-4 text-blue-700 focus:ring-blue-500 border-gray-300 rounded"
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="••••••••"
                   disabled={isLoading}
                 />
-                <label htmlFor="rememberMe" className="ml-2 block text-sm text-gray-900">
-                  Ingat saya
-                </label>
               </div>
+            </div>
 
-              <div className="text-sm">
-                <a href="/forgot-password" className="font-medium text-blue-700 hover:text-blue-800">
-                  Lupa password?
+            <div className="flex items-center">
+              <input
+                id="agreeToTerms"
+                name="agreeToTerms"
+                type="checkbox"
+                checked={formData.agreeToTerms}
+                onChange={handleChange}
+                className="h-4 w-4 text-blue-700 focus:ring-blue-500 border-gray-300 rounded"
+                disabled={isLoading}
+              />
+              <label htmlFor="agreeToTerms" className="ml-2 block text-sm text-gray-900">
+                Saya setuju dengan{' '}
+                <a href="/terms" className="font-medium text-blue-700 hover:text-blue-800">
+                  syarat dan ketentuan
                 </a>
-              </div>
+              </label>
             </div>
 
             <div>
@@ -202,41 +214,11 @@ export default function RegisterPage() {
                 disabled={isLoading}
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-full shadow-sm text-sm font-medium text-white bg-blue-700 hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 disabled:opacity-50"
               >
-                {isLoading ? 'Memproses...' : 'Masuk'}
+                {isLoading ? 'Memproses...' : 'Daftar'}
               </button>
             </div>
           </form>
 
-          <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Atau masuk dengan</span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-2 gap-3">
-                <button
-                    type="button"
-                    disabled={isLoading}
-                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-300 disabled:opacity-50"
-                  >
-                    <FcGoogle className="h-5 w-5" />
-                    <span className="ml-2">Google</span>
-                </button>
-                
-                <button
-                    type="button"
-                    disabled={isLoading}
-                    className="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition duration-300 disabled:opacity-50"
-                  >
-                    <FaFacebook className="h-5 w-5 text-blue-600" />
-                    <span className="ml-2">Facebook</span>
-                </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>

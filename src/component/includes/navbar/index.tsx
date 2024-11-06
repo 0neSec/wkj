@@ -12,9 +12,10 @@ export default function Navbar() {
   const [servicesMenuOpen, setServicesMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [activeMobileSubmenu, setActiveMobileSubmenu] = useState<string | null>(null);
-  
+  const [username, setUsername] = useState<string | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
   const isAuthenticated = authService.isAuthenticated();
-  const username = authService.getCurrentUsername();
   const { role } = authService.getAuthState();
   const isAdmin = role === 'admin';
 
@@ -54,6 +55,18 @@ export default function Navbar() {
       document.body.style.overflow = 'unset';
     };
   }, [mobileMenuOpen]);
+  useEffect(() => {
+    const storageType = localStorage.getItem('storageType');
+    const storage = storageType === 'local' ? localStorage : sessionStorage;
+
+    const storedUsername = storage.getItem('username');
+    const storedEmail = storage.getItem('email');
+
+    setUsername(storedUsername);
+    setEmail(storedEmail);
+    setLoading(false);
+  }, []);
+
 
   const handleLogout = () => {
     localStorage.clear();
