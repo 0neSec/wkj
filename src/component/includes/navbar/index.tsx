@@ -56,8 +56,9 @@ export default function Navbar() {
   }, [mobileMenuOpen]);
 
   const handleLogout = () => {
-    authService.logout();
-    window.location.href = '/';
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.href = '/login';
   };
 
   const renderServiceItem = (service: Service) => (
