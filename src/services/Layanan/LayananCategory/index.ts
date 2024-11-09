@@ -1,28 +1,32 @@
 import axios, { AxiosError, AxiosInstance } from 'axios';
 
-// Types
-export interface ServiceCategory {
-    id: string;
+export interface ServiceCategoryContent {
+    id: number;
     name: string;
+    description?: string;
+    created_at: string;
+    updated_at: string;
 }
 
 export interface CreateServiceCategoryData {
     name: string;
+    description?: string;
 }
 
 export interface UpdateServiceCategoryData {
-    id: string;
-    name: string;
+    id: number;
+    name?: string;
+    description?: string;
 }
 
-class LayananCategoryService {
+class ServiceCategoryService {
     private axiosInstance: AxiosInstance;
 
     constructor() {
         const storageType = localStorage.getItem('storageType');
         const storage = storageType === 'local' ? localStorage : sessionStorage;
         const token = storage.getItem('token');
-
+        
         this.axiosInstance = axios.create({
             baseURL: process.env.REACT_APP_API_URL,
             timeout: 10000,
@@ -32,38 +36,63 @@ class LayananCategoryService {
         });
     }
 
-    async createServiceCategory(data: CreateServiceCategoryData): Promise<ServiceCategory | undefined> {
+    async createServiceCategory(data: CreateServiceCategoryData): Promise<ServiceCategoryContent | undefined> {
         try {
-            const response = await this.axiosInstance.post<ServiceCategory>('/admin/service-category', { name: data.name });
-            console.log(response.data);
-            return response.data;
+            const response = await this.axiosInstance.post<{
+                message: string;
+                ServiceCategory: ServiceCategoryContent;
+            }>('/admin/service-category', data);
+            return response.data.ServiceCategory;
         } catch (error) {
             this.handleError(error, 'Failed to create service category');
             return undefined;
         }
     }
 
-    async getServiceCategory(id: string): Promise<ServiceCategory | undefined> {
+    async getServiceCategories(): Promise<ServiceCategoryContent[]> {
         try {
-            const response = await this.axiosInstance.get<{ serviceCategory: ServiceCategory }>(`/service-category/${id}`);
-            return response.data.serviceCategory;
+            const response = await this.axiosInstance.get<{
+                ServiceCategory: ServiceCategoryContent[];
+            }>('/service-category');
+            return response.data.ServiceCategory;
+        } catch (error) {
+            this.handleError(error, 'Failed to retrieve service categories');
+            return [];
+        }
+    }
+
+    async getServiceCategoryById(id: number): Promise<ServiceCategoryContent | undefined> {
+        try {
+            const response = await this.axiosInstance.get<{
+                ServiceCategory: ServiceCategoryContent;
+            }>(`/service-category/${id}`);
+            return response.data.ServiceCategory;
         } catch (error) {
             this.handleError(error, 'Failed to retrieve service category');
             return undefined;
         }
     }
 
-    async updateServiceCategory(data: UpdateServiceCategoryData): Promise<ServiceCategory | undefined> {
+    async updateServiceCategory(data: UpdateServiceCategoryData): Promise<ServiceCategoryContent | undefined> {
         try {
-            const response = await this.axiosInstance.put<ServiceCategory>(`/admin/service-category/${data.id}`, { name: data.name });
-            return response.data;
+            const response = await this.axiosInstance.put<{
+                message: string;
+                ServiceCategory: ServiceCategoryContent;
+            }>(`/admin/service-category/${data.id}`, data);
+            
+            return response.data.ServiceCategory;
         } catch (error) {
+            if (error instanceof AxiosError) {
+                if (error.response?.status === 409) {
+                    throw new Error("Conflict: A service category with this name already exists.");
+                }
+            }
             this.handleError(error, 'Failed to update service category');
             return undefined;
         }
     }
 
-    async deleteServiceCategory(id: string): Promise<void> {
+    async deleteServiceCategory(id: number): Promise<void> {
         try {
             await this.axiosInstance.delete(`/admin/service-category/${id}`);
         } catch (error) {
@@ -71,21 +100,18 @@ class LayananCategoryService {
         }
     }
 
-    async getAllServiceCategories(): Promise<ServiceCategory[]> {
-    try {
-        const response = await this.axiosInstance.get('/service-category');
-        console.log('Response data:', response.data); // Log the entire response data
-
-        return response.data; // Assuming this is where the data should be
-    } catch (error) {
-        console.error('Error in getAllServiceCategories:', error);
-        this.handleError(error, 'Failed to retrieve service categories');
-        return [];
+    async searchServiceCategories(query: string): Promise<ServiceCategoryContent[]> {
+        try {
+            const response = await this.axiosInstance.get<{
+                ServiceCategory: ServiceCategoryContent[];
+            }>(`/service-category/search?query=${encodeURIComponent(query)}`);
+            return response.data.ServiceCategory;
+        } catch (error) {
+            this.handleError(error, 'Failed to search service categories');
+            return [];
+        }
     }
-    }
 
-
-    // Centralized error handling
     private handleError(error: unknown, message: string) {
         if (error instanceof AxiosError) {
             console.error(`${message}:`, error.response?.data);
@@ -96,4 +122,4 @@ class LayananCategoryService {
     }
 }
 
-export const layananCategoryService = new LayananCategoryService();
+export const serviceCategoryService = new ServiceCategoryService();

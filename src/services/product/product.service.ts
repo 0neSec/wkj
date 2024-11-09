@@ -179,11 +179,13 @@ class ProductService {
         }
     }
 
-    async getAllProducts(): Promise<Product[]> {
+    async getAllProducts() {
         try {
             const response = await this.axiosInstance.get<{
                 Products: Product[];
             }>('/product');
+            console.log(response.data.Products);
+
             return response.data.Products;
         } catch (error) {
             this.handleError(error, 'Failed to retrieve products');

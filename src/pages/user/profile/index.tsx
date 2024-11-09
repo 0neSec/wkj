@@ -1,7 +1,7 @@
 import React from 'react';
 import { FaFacebookF, FaTwitter, FaLinkedinIn } from 'react-icons/fa';
-import Navbar from '../../../../component/includes/navbar';
-import Footer from '../../../../component/includes/footer';
+import Navbar from '../../../component/includes/navbar';
+import Footer from '../../../component/includes/footer';
 
 function Profile() {
   return (

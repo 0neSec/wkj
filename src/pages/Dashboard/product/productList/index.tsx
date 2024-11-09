@@ -1,18 +1,18 @@
 
 import React, { useEffect, useState } from "react";
-import Navbar from "../../../../../component/includes/navbar";
-import Sidebar from "../../../../../component/includes/sidebar";
+import Navbar from "../../../../component/includes/navbar";
+import Sidebar from "../../../../component/includes/sidebar";
 import {
   Product,
   CreateProductData,
   UpdateProductData,
   productService,
-} from "../../../../../services/product/product.service";
+} from "../../../../services/product/product.service";
 import {
   ProductCategory,
   productCategoryService,
-} from "../../../../../services/product/product-category.service";
-import ArrayInput from "../../../../../component/includes/product/Array";
+} from "../../../../services/product/product-category.service";
+import ArrayInput from "../../../../component/includes/product/Array";
 
 const DashboardProduct = () => {
   const [products, setProducts] = useState<Product[]>([]);

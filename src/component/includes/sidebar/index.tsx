@@ -61,12 +61,13 @@ const Sidebar = () => {
       icon: BookOpen, // Use an appropriate icon
       path: "/content",
       submenu: [
-        { label: "Tentang", path: "/dashboard/content/tentang" },
-        { label: "Task", path: "/dashboard/content/task" },
-        { label: "Fungsi", path: "/dashboard/content/funtion" },
-        { label: "Visi Misi", path: "#" },
-        { label: "Sejarah", path: "/dashboard/content/sejarah" },
-        { label: "Struktur Organisasi", path: "#" },
+        { label: "Tentang Content", path: "/dashboard/content/tentang" },
+        { label: "Task Content", path: "/dashboard/content/task" },
+        { label: "Fungsi Content", path: "/dashboard/content/funtion" },
+        { label: "Visi Content", path: "/dashboard/content/visi" },
+        { label: "Misi Content", path: "/dashboard/content/misi" },
+        { label: "Sejarah Content", path: "/dashboard/content/sejarah" },
+        { label: "Struktur Organisasi", path: "/dashboard/content/struktur" },
       ],
     },
     {
@@ -105,13 +106,20 @@ const Sidebar = () => {
       path: "#",
     },
     {
+      id: "Berita Management",
+      label: "Berita",
+      icon: BookOpen,
+      // path: "/articles",
+      path: "/dashboard/berita",
+    },
+    {
       id: "services",
       label: "Layanan",
       icon: BookOpen,
       path: "/dashboard/services",
       submenu: [
-        { label: "Services", path: "#" },
-        { label: "Service Category", path: "#" },
+        { label: "Services", path: "/dashboard/services" },
+        { label: "Service Category", path: "/dashboard/services-category" },
       ],
     },
   ];

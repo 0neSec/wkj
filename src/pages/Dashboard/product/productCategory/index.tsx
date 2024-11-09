@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { CreateProductCategoryData, ProductCategory, productCategoryService, UpdateProductCategoryData } from '../../../../../services/product/product-category.service';
-import Navbar from '../../../../../component/includes/navbar';
-import Sidebar from '../../../../../component/includes/sidebar';
+import { CreateProductCategoryData, ProductCategory, productCategoryService, UpdateProductCategoryData } from '../../../../services/product/product-category.service';
+import Navbar from '../../../../component/includes/navbar';
+import Sidebar from '../../../../component/includes/sidebar';
 import { Menu } from 'lucide-react';
 
 const ProductCategoryManagementPage: React.FC = () => {

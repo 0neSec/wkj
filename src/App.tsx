@@ -16,22 +16,26 @@ import PenelitianJamu from "./pages/layanan/PenelitianJamu";
 import PengolahanTanaman from "./pages/layanan/PengolahanTanaman";
 import WisataEdukasi from "./pages/layanan/WisataEdukasi";
 import PelatihanWorkshop from "./pages/layanan/PelatihanWorkshop";
-import Dashboard from "./pages/Dashboard/admin";
-import ManagemenUsers from "./pages/Dashboard/admin/users";
+import Dashboard from "./pages/Dashboard";
+import ManagemenUsers from "./pages/Dashboard/users";
 import LoginPage from "./pages/Auth/login";
-import Profile from "./pages/profile";
-import DashboardProduct from "./pages/Dashboard/admin/product/productList";
-import DashboardProductCategory from "./pages/Dashboard/admin/product/productCategory";
+import Profile from "./pages/Dashboard/profile";
+import DashboardProduct from "./pages/Dashboard/product/productList";
+import DashboardProductCategory from "./pages/Dashboard/product/productCategory";
 import ProtectedRoute from "./services/Protected/ProtectedRoute";
 import UnauthorizedPage from "./services/Protected/Unauthorized";
-import DasboardServiceCategoryPage from "./pages/Dashboard/admin/Layanan/Layanan-Category";
-import DashboardServicePage from "./pages/Dashboard/admin/Layanan/LayananList";
+import DasboardServiceCategoryPage from "./pages/Dashboard/Layanan/Layanan-Category";
+import DashboardServicePage from "./pages/Dashboard/Layanan/LayananList";
 import ProductDetail from "./component/includes/product/Detail";
-import DashboardProfile from "./pages/Dashboard/admin/profile";
-import DashboardTask from "./pages/Dashboard/admin/profile/taskTentang";
-import FunctionManagement from "./pages/Dashboard/admin/profile/fungsiTentang";
+import DashboardProfile from "./pages/Dashboard/profile";
+import DashboardTask from "./pages/Dashboard/profile/taskTentang";
+import FunctionManagement from "./pages/Dashboard/profile/fungsiTentang";
 import RegisterPage from "./pages/Auth/register";
-import HistoryManagement from "./pages/Dashboard/admin/profile/HistoryTentang";
+import HistoryManagement from "./pages/Dashboard/profile/HistoryTentang";
+import MisiManagement from "./pages/Dashboard/profile/MisiManagement";
+import VisiManagement from "./pages/Dashboard/profile/VisiManagement";
+import OrganizationStructureManagement from "./pages/Dashboard/profile/OrganisasiStruktur";
+import DashboardServiceCategoryPage from "./pages/Dashboard/Layanan/Layanan-Category";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -138,6 +142,14 @@ function App() {
           }
         />
         <Route
+          path="/dashboard/services-category"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <DashboardServiceCategoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/dashboard/content/tentang"
           element={
             <ProtectedRoute requiredRole="admin">
@@ -165,7 +177,31 @@ function App() {
           path="/dashboard/content/sejarah"
           element={
             <ProtectedRoute requiredRole="admin">
-              <HistoryManagement/>
+              <HistoryManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/content/misi"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <MisiManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/content/visi"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <VisiManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/content/struktur"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <OrganizationStructureManagement />
             </ProtectedRoute>
           }
         />

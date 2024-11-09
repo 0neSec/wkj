@@ -4,10 +4,10 @@ import {
   ProfileContent,
   profileService,
   UpdateProfileData,
-} from "../../../../services/Tentang/TentangService";
-import Navbar from "../../../../component/includes/navbar";
-import Sidebar from "../../../../component/includes/sidebar";
-import { userTentangMessages } from "../../../../types/massage";
+} from "../../../services/Tentang/TentangService";
+import Navbar from "../../../component/includes/navbar";
+import Sidebar from "../../../component/includes/sidebar";
+import { userTentangMessages } from "../../../types/massage";
 
 const DashboardProfile = () => {
   const [profiles, setProfiles] = useState<ProfileContent[]>([]);

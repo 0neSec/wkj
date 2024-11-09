@@ -1,20 +1,23 @@
-import React, { useEffect, useState } from 'react';
-import { TaskContent, taskService } from '../../../services/Tentang/task';
-import { FunctionContent, functionService } from '../../../services/Tentang/FunctionService';
+import React, { useEffect, useState } from "react";
+import { TaskContent, taskService } from "../../../services/Tentang/task";
+import {
+  FunctionContent,
+  functionService,
+} from "../../../services/Tentang/FunctionService";
 
 const CombinedManager = () => {
   const [tasks, setTasks] = useState<TaskContent[]>([]);
   const [functions, setFunctions] = useState<FunctionContent[]>([]);
   const [loading, setLoading] = useState({
     tasks: true,
-    functions: true
+    functions: true,
   });
   const [error, setError] = useState<{
     tasks: string | null;
     functions: string | null;
   }>({
     tasks: null,
-    functions: null
+    functions: null,
   });
 
   useEffect(() => {
@@ -22,39 +25,36 @@ const CombinedManager = () => {
   }, []);
 
   const fetchData = async () => {
-    await Promise.all([
-      fetchTasks(),
-      fetchFunctions()
-    ]);
+    await Promise.all([fetchTasks(), fetchFunctions()]);
   };
 
   const fetchTasks = async () => {
     try {
-      setLoading(prev => ({ ...prev, tasks: true }));
+      setLoading((prev) => ({ ...prev, tasks: true }));
       const fetchedTasks = await taskService.getTasks();
       setTasks(fetchedTasks);
     } catch (err) {
-      setError(prev => ({ ...prev, tasks: 'Failed to load tasks' }));
+      setError((prev) => ({ ...prev, tasks: "Failed to load tasks" }));
     } finally {
-      setLoading(prev => ({ ...prev, tasks: false }));
+      setLoading((prev) => ({ ...prev, tasks: false }));
     }
   };
 
   const fetchFunctions = async () => {
     try {
-      setLoading(prev => ({ ...prev, functions: true }));
+      setLoading((prev) => ({ ...prev, functions: true }));
       const fetchedFunctions = await functionService.getFunctions();
       setFunctions(fetchedFunctions);
     } catch (err) {
-      setError(prev => ({ ...prev, functions: 'Failed to load functions' }));
+      setError((prev) => ({ ...prev, functions: "Failed to load functions" }));
     } finally {
-      setLoading(prev => ({ ...prev, functions: false }));
+      setLoading((prev) => ({ ...prev, functions: false }));
     }
   };
 
   const renderContent = (
     items: Array<TaskContent | FunctionContent>,
-    type: 'tasks' | 'functions'
+    type: "tasks" | "functions"
   ) => {
     if (loading[type]) {
       return (
@@ -75,9 +75,9 @@ const CombinedManager = () => {
     if (items.length === 0) {
       return (
         <div className="text-center text-gray-500 py-8">
-          {type === 'tasks' 
-            ? 'Tidak ada tugas yang tersedia.'
-            : 'Tidak ada fungsi yang tersedia.'}
+          {type === "tasks"
+            ? "Tidak ada tugas yang tersedia."
+            : "Tidak ada fungsi yang tersedia."}
         </div>
       );
     }
@@ -85,11 +85,8 @@ const CombinedManager = () => {
     return (
       <div className="space-y-4">
         {items.map((item) => (
-          <div 
-            key={item.id}
-            className="bg-white border shadow-sm rounded-lg p-6 hover:shadow-md transition-all duration-300 hover:border-green-200"
-          >
-            <p className="text-black text-lg leading-relaxed">
+          <div key={item.id} className="">
+            <p className="text-black leading-relaxed text-justify">
               {item.description}
             </p>
           </div>
@@ -104,7 +101,7 @@ const CombinedManager = () => {
         <div>
           {/* Tasks Section */}
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-green-800 mb-2">Tugas</h2>
+            <h2 className="text-3xl font-bold text-green-800 mb-2">Tugas</h2>
             <div className="flex items-center justify-center gap-2">
               <div className="h-1 w-12 bg-green-600 rounded-full" />
               <div className="h-1.5 w-1.5 bg-green-600 rounded-full" />
@@ -112,22 +109,22 @@ const CombinedManager = () => {
             </div>
           </div>
           <div className=" bg-opacity-50 rounded-xl p-6">
-            {renderContent(tasks, 'tasks')}
+            {renderContent(tasks, "tasks")}
           </div>
         </div>
 
         <div>
           {/* Functions Section */}
           <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-green-800 mb-2">Fungsi</h2>
+            <h2 className="text-3xl font-bold text-green-800 mb-2">Fungsi</h2>
             <div className="flex items-center justify-center gap-2">
               <div className="h-1 w-12 bg-green-600 rounded-full" />
               <div className="h-1.5 w-1.5 bg-green-600 rounded-full" />
               <div className="h-1 w-12 bg-green-600 rounded-full" />
             </div>
           </div>
-          <div className=" bg-opacity-50 rounded-xl p-6">
-            {renderContent(functions, 'functions')}
+          <div className=" bg-opacity-50 rounded-xl p-2">
+            {renderContent(functions, "functions")}
           </div>
         </div>
       </div>

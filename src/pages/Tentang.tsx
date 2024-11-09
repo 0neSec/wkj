@@ -4,6 +4,8 @@ import Footer from "../component/includes/footer";
 import TentangProfile from "../component/includes/Tentang/Tentang";
 import TaskManager from "../component/includes/Tentang/Task";
 import History from "../component/includes/Tentang/Sejarah";
+import VisiMisiSection from "../component/includes/Tentang/VisiMisi";
+import OrganizationStructure from "../component/includes/Tentang/OrganisasiStruktur";
 
 function Tentang() {
   return (
@@ -34,7 +36,8 @@ function Tentang() {
               </div>
             </div>
 
-            <section className="mt-16">
+            {/* Tentang Kami Section */}
+            <section className="mt-10">
               <div className="max-w-6xl mx-auto">
                 <div className="bg-white rounded-lg shadow-lg p-6">
                   <div className="text-center mb-8">
@@ -53,7 +56,7 @@ function Tentang() {
             </section>
 
             {/* Task Manager Section */}
-            <section className="mt-16">
+            <section className="mt-10">
               <div className="max-w-6xl mx-auto">
                 <div className="bg-white rounded-lg shadow-lg p-6">
                   <TaskManager />
@@ -61,12 +64,41 @@ function Tentang() {
               </div>
             </section>
 
-            <section className="mt-16">
+            {/* Visi Misi Section */}
+            <section className="mt-10">
+              <div className="max-w-6xl mx-auto">
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <VisiMisiSection />
+                </div>
+              </div>
+            </section>
+
+            {/* Organization Structure Section */}
+            <section className="mt-10">
               <div className="max-w-6xl mx-auto">
                 <div className="bg-white rounded-lg shadow-lg p-6">
                   <div className="text-center mb-8">
                     <h2 className="text-3xl font-bold text-green-800 mb-4">
-                     Sejarah
+                      Struktur Organisasi
+                    </h2>
+                    <div className="flex items-center justify-center gap-4 mb-12">
+                      <div className="h-1 w-20 bg-green-600 rounded-full" />
+                      <div className="h-2 w-2 bg-green-600 rounded-full" />
+                      <div className="h-1 w-20 bg-green-600 rounded-full" />
+                    </div>
+                  </div>
+                  <OrganizationStructure />
+                </div>
+              </div>
+            </section>
+
+            {/* Sejarah Section */}
+            <section className="mt-10">
+              <div className="max-w-6xl mx-auto">
+                <div className="bg-white rounded-lg shadow-lg p-6">
+                  <div className="text-center mb-8">
+                    <h2 className="text-3xl font-bold text-green-800 mb-4">
+                      Sejarah
                     </h2>
                     <div className="flex items-center justify-center gap-4 mb-12">
                       <div className="h-1 w-20 bg-green-600 rounded-full" />

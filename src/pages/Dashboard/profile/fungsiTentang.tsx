@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { CreateFunctionData, FunctionContent, functionService, UpdateFunctionData } from "../../../../services/Tentang/FunctionService";
-import Navbar from "../../../../component/includes/navbar";
-import Sidebar from "../../../../component/includes/sidebar";
+import { CreateFunctionData, FunctionContent, functionService, UpdateFunctionData } from "../../../services/Tentang/FunctionService";
+import Navbar from "../../../component/includes/navbar";
+import Sidebar from "../../../component/includes/sidebar";
 
 const FunctionManagement = () => {
   const [functions, setFunctions] = useState<FunctionContent[]>([]);

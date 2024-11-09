@@ -1,45 +1,57 @@
 import React, { useEffect, useState } from "react";
 import {
-  CreateHistoryData,
-  HistoryContent,
-  historyService,
-  UpdateHistoryData,
-} from "../../../../services/Tentang/HistoryService";
-import Navbar from "../../../../component/includes/navbar";
-import Sidebar from "../../../../component/includes/sidebar";
+  CreateMisiData,
+  MisiContent,
+  misiService,
+  UpdateMisiData,
+} from "../../../services/Tentang/MisiService";
+import Navbar from "../../../component/includes/navbar";
+import Sidebar from "../../../component/includes/sidebar";
 
-const HistoryManagement = () => {
+// Helper component to render text with paragraphs
+const FormattedDescription: React.FC<{ text: string }> = ({ text }) => {
+  return (
+    <>
+      {text.split('\n').map((paragraph, index) => (
+        <React.Fragment key={index}>
+          {paragraph}
+          {index < text.split('\n').length - 1 && <br />}
+        </React.Fragment>
+      ))}
+    </>
+  );
+};
+
+const MisiManagement = () => {
   // State Management
-  const [histories, setHistories] = useState<HistoryContent[]>([]);
+  const [misiList, setMisiList] = useState<MisiContent[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingHistory, setEditingHistory] = useState<HistoryContent | null>(
-    null
-  );
-  const [newHistory, setNewHistory] = useState<CreateHistoryData>({
+  const [editingMisi, setEditingMisi] = useState<MisiContent | null>(null);
+  const [newMisi, setNewMisi] = useState<CreateMisiData>({
     description: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Data Fetching
-  const fetchHistories = async () => {
+  const fetchMisiList = async () => {
     try {
       setLoading(true);
-      const response = await historyService.getHistories();
-      setHistories(response);
+      const response = await misiService.getMisiList();
+      setMisiList(response);
     } catch (err) {
-      showError("Failed to fetch histories");
-      console.error("Error fetching histories:", err);
+      showError("Failed to fetch misi list");
+      console.error("Error fetching misi list:", err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchHistories();
+    fetchMisiList();
   }, []);
 
   // Utility Functions
@@ -54,67 +66,66 @@ const HistoryManagement = () => {
   };
 
   const resetForm = () => {
-    setNewHistory({ description: "" });
-    setEditingHistory(null);
+    setNewMisi({ description: "" });
+    setEditingMisi(null);
     setIsModalOpen(false);
   };
 
   // CRUD Operations
-  const handleCreateHistory = async () => {
-    if (!newHistory.description.trim()) {
-      showError("History description cannot be empty");
+  const handleCreateMisi = async () => {
+    if (!newMisi.description.trim()) {
+      showError("Misi description cannot be empty");
       return;
     }
 
     try {
-      await historyService.createHistory(newHistory);
-      await fetchHistories();
-      showSuccess("History created successfully");
+      await misiService.createMisi(newMisi);
+      await fetchMisiList();
+      showSuccess("Misi created successfully");
       resetForm();
     } catch (err) {
-      showError("Failed to create history");
-      console.error("Error creating history:", err);
+      showError("Failed to create misi");
+      console.error("Error creating misi:", err);
     }
   };
 
-  const handleUpdateHistory = async () => {
-    if (!editingHistory?.description.trim()) {
-      showError("History description cannot be empty");
+  const handleUpdateMisi = async () => {
+    if (!editingMisi?.description.trim()) {
+      showError("Misi description cannot be empty");
       return;
     }
 
     try {
-      const updatedData: UpdateHistoryData = {
-        id: editingHistory.id,
-        description: editingHistory.description,
+      const updatedData: UpdateMisiData = {
+        id: editingMisi.id,
+        description: editingMisi.description,
       };
-      await historyService.updateHistory(updatedData);
-      await fetchHistories();
-      showSuccess("History updated successfully");
+      await misiService.updateMisi(updatedData);
+      await fetchMisiList();
+      showSuccess("Misi updated successfully");
       resetForm();
     } catch (err) {
-      showError("Failed to update history");
-      console.error("Error updating history:", err);
+      showError("Failed to update misi");
+      console.error("Error updating misi:", err);
     }
   };
 
-  const handleDeleteHistory = async (historyId: number) => {
-    if (!window.confirm("Are you sure you want to delete this history?"))
-      return;
+  const handleDeleteMisi = async (misiId: number) => {
+    if (!window.confirm("Are you sure you want to delete this misi?")) return;
 
     try {
-      await historyService.deleteHistory(historyId);
-      await fetchHistories();
-      showSuccess("History deleted successfully");
+      await misiService.deleteMisi(misiId);
+      await fetchMisiList();
+      showSuccess("Misi deleted successfully");
     } catch (err) {
-      showError("Failed to delete history");
-      console.error("Error deleting history:", err);
+      showError("Failed to delete misi");
+      console.error("Error deleting misi:", err);
     }
   };
 
   // Filtered Data
-  const filteredHistories = histories.filter((h) =>
-    h.description.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredMisiList = misiList.filter((m) =>
+    m.description.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -146,27 +157,25 @@ const HistoryManagement = () => {
       <Navbar />
 
       <div className="flex flex-col md:flex-row">
-
-
         <Sidebar />
 
-        <main className="flex-1 p-4 md:p-6 mt-10">
+        <main className="flex-1 p-4 md:p-6 mt-20">
           <div className="max-w-8xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
               <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-                History Management
+                Misi Management
               </h1>
               <button
                 onClick={() => setIsModalOpen(true)}
                 className="w-full md:w-auto bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors"
               >
-                Add New History
+                Add New Misi
               </button>
             </div>
 
             <input
               type="text"
-              placeholder="Search histories..."
+              placeholder="Search misi..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-2 border rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -189,28 +198,25 @@ const HistoryManagement = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredHistories.map((history) => (
-                      <tr
-                        key={history.id}
-                        className="border-b hover:bg-gray-50"
-                      >
-                        <td className="px-4 py-3">{history.id}</td>
+                    {filteredMisiList.map((misi) => (
+                      <tr key={misi.id} className="border-b hover:bg-gray-50">
+                        <td className="px-4 py-3">{misi.id}</td>
                         <td className="px-4 py-3">
-                          <div className="max-w-xs md:max-w-md truncate">
-                            {history.description}
+                          <div className="max-w-xs md:max-w-md">
+                            <FormattedDescription text={misi.description} />
                           </div>
                         </td>
                         <td className="px-4 py-3 hidden md:table-cell">
-                          {new Date(history.created_at).toLocaleDateString()}
+                          {new Date(misi.created_at).toLocaleDateString()}
                         </td>
                         <td className="px-4 py-3 hidden md:table-cell">
-                          {new Date(history.updated_at).toLocaleDateString()}
+                          {new Date(misi.updated_at).toLocaleDateString()}
                         </td>
                         <td className="px-4 py-3 text-right">
                           <div className="flex justify-end gap-2">
                             <button
                               onClick={() => {
-                                setEditingHistory(history);
+                                setEditingMisi(misi);
                                 setIsModalOpen(true);
                               }}
                               className="text-blue-500 hover:underline"
@@ -218,7 +224,7 @@ const HistoryManagement = () => {
                               Edit
                             </button>
                             <button
-                              onClick={() => handleDeleteHistory(history.id)}
+                              onClick={() => handleDeleteMisi(misi.id)}
                               className="text-red-500 hover:underline"
                             >
                               Delete
@@ -242,7 +248,7 @@ const HistoryManagement = () => {
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">
-                  {editingHistory ? "Edit History" : "Add New History"}
+                  {editingMisi ? "Edit Misi" : "Add New Misi"}
                 </h2>
                 <button
                   onClick={() => setIsModalOpen(false)}
@@ -265,22 +271,18 @@ const HistoryManagement = () => {
               </div>
               <div className="space-y-4">
                 <textarea
-                  value={
-                    editingHistory
-                      ? editingHistory.description
-                      : newHistory.description
-                  }
+                  value={editingMisi ? editingMisi.description : newMisi.description}
                   onChange={(e) => {
-                    if (editingHistory) {
-                      setEditingHistory({
-                        ...editingHistory,
+                    if (editingMisi) {
+                      setEditingMisi({
+                        ...editingMisi,
                         description: e.target.value,
                       });
                     } else {
-                      setNewHistory({ description: e.target.value });
+                      setNewMisi({ description: e.target.value });
                     }
                   }}
-                  placeholder="Enter history description..."
+                  placeholder="Enter misi description..."
                   className="border px-4 py-3 rounded-lg w-full h-32 resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
                 <div className="flex flex-col md:flex-row justify-end gap-4">
@@ -291,12 +293,10 @@ const HistoryManagement = () => {
                     Cancel
                   </button>
                   <button
-                    onClick={
-                      editingHistory ? handleUpdateHistory : handleCreateHistory
-                    }
+                    onClick={editingMisi ? handleUpdateMisi : handleCreateMisi}
                     className="w-full md:w-auto bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
                   >
-                    {editingHistory ? "Update" : "Create"}
+                    {editingMisi ? "Update" : "Create"}
                   </button>
                 </div>
               </div>
@@ -308,4 +308,4 @@ const HistoryManagement = () => {
   );
 };
 
-export default HistoryManagement;
+export default MisiManagement;

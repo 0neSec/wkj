@@ -25,7 +25,11 @@ const TentangProfile: React.FC = () => {
 
   const formatDescription = (text: string) => {
     return text.split('\n').map((line, index) => (
-      <p key={index} className="mb-4 last:mb-0">
+      <p 
+        key={index} 
+        className="mb-4 last:mb-0 text-justify first-letter:ml-8"
+        style={{ textIndent: '2em' }}
+      >
         {line}
       </p>
     ));
@@ -58,7 +62,7 @@ const TentangProfile: React.FC = () => {
           {profiles.map((profile) => (
             <div
               key={profile.id}
-              className="bg-white shadow-sm rounded-lg p-6 hover:shadow-md transition-shadow"
+              className=""
             >
               <div className="text-gray-700 leading-relaxed">
                 {formatDescription(profile.description)}

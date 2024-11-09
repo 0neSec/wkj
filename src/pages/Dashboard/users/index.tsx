@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Users } from 'lucide-react';
-import Navbar from '../../../../component/includes/navbar';
-import Sidebar from '../../../../component/includes/sidebar';
+import Navbar from '../../../component/includes/navbar';
+import Sidebar from '../../../component/includes/sidebar';
 import { FaFemale, FaMale } from 'react-icons/fa';
 
 const ManagementUsers = () => {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProductCategory } from '../../../pages/Dashboard/admin/product/productCategory/types';
+import { ProductCategory } from '../../../pages/Dashboard/product/productCategory/types';
 
 interface CategoryModalProps {
   isEdit: boolean;
