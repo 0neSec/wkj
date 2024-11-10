@@ -2,9 +2,11 @@ import React, { useEffect, useState } from "react";
 import { CreateServiceData, Service, serviceApiClient, UpdateServiceData } from "../../../../services/Layanan/ListLayanan";
 import Navbar from "../../../../component/includes/navbar";
 import Sidebar from "../../../../component/includes/sidebar";
+import { ServiceCategoryContent, serviceCategoryService } from "../../../../services/Layanan/LayananCategory";
 
 const ServiceManagement = () => {
   const [services, setServices] = useState<Service[]>([]);
+  const [categories, setCategories] = useState<ServiceCategoryContent[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -23,6 +25,7 @@ const ServiceManagement = () => {
 
   useEffect(() => {
     fetchServices();
+    fetchCategories();
   }, []);
 
   const fetchServices = async () => {
@@ -38,6 +41,18 @@ const ServiceManagement = () => {
       setLoading(false);
     }
   };
+  const fetchCategories = async () => {
+    try {
+      const response = await serviceCategoryService.getServiceCategories();
+      console.log(response);
+      
+      setCategories(response);
+    } catch (err) {
+      setError("Failed to fetch categories");
+      setIsErrorModalOpen(true);
+      console.error("Error fetching categories:", err);
+    }
+  };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -47,7 +62,7 @@ const ServiceManagement = () => {
       setImagePreview(previewUrl);
       
       if (editingService) {
-        setEditingService({ ...editingService, imageURL: previewUrl });
+        setEditingService({ ...editingService, image_url: previewUrl });
       }
     }
   };
@@ -91,7 +106,7 @@ const ServiceManagement = () => {
         id: editingService.id,
         name: editingService.name,
         description: editingService.description,
-        serviceCategoryId: editingService.serviceCategoryId,
+        serviceCategoryId: editingService.service_category_id,
         ...(selectedImage && { image: selectedImage })
       };
       
@@ -142,7 +157,7 @@ const ServiceManagement = () => {
   return (
     <div className="min-h-screen ">
       <Navbar />
-      <div className="flex flex-col md:flex-row mt-24">
+      <div className="flex flex-col md:flex-row mt-16">
         <Sidebar />
         <div className="flex-1 p-4 md:p-6  md:mt-5">
           <div className="max-w-7xl mx-auto">
@@ -190,7 +205,7 @@ const ServiceManagement = () => {
                       <td className="px-4 py-3">{service.id}</td>
                       <td className="px-4 py-3">
                         <img
-                          src={service.imageURL}
+                          src={`${process.env.REACT_APP_API_URL}${service.image_url}`}
                           alt={service.name}
                           className="w-16 h-16 object-cover rounded"
                         />
@@ -209,7 +224,7 @@ const ServiceManagement = () => {
                           <button
                             onClick={() => {
                               setEditingService(service);
-                              setImagePreview(service.imageURL);
+                              setImagePreview(service.image_url);
                               setIsModalOpen(true);
                             }}
                             className="text-blue-500 hover:underline whitespace-nowrap"
@@ -273,21 +288,26 @@ const ServiceManagement = () => {
                       </div>
 
                       <div>
-                        <label className="block mb-2">Category ID</label>
-                        <input
-                          type="number"
-                          value={editingService ? editingService.serviceCategoryId : newService.serviceCategoryId}
+                        <label className="block mb-2">Category</label>
+                        <select
+                          value={editingService ? editingService.service_category_id : newService.serviceCategoryId}
                           onChange={(e) => {
                             const value = parseInt(e.target.value) || 0;
                             if (editingService) {
-                              setEditingService({ ...editingService, serviceCategoryId: value });
+                              setEditingService({ ...editingService, service_category_id: value });
                             } else {
                               setNewService({ ...newService, serviceCategoryId: value });
                             }
                           }}
-                          className="border px-4 py-2 rounded-lg w-full"
-                          placeholder="Enter category ID"
-                        />
+                          className="border px-4 py-2 rounded-lg w-full bg-white"
+                        >
+                          <option value={0}>Select a category</option>
+                          {categories.map((category) => (
+                            <option key={category.id} value={category.id}>
+                              {category.name}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
                       <div>
@@ -300,7 +320,7 @@ const ServiceManagement = () => {
                         />
                         {imagePreview && (
                           <img
-                            src={imagePreview}
+                            src={`${process.env.REACT_APP_API_URL}${imagePreview}`}
                             alt="Preview"
                             className="mt-2 w-32 h-32 object-cover rounded"
                           />

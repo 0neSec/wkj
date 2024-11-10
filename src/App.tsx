@@ -19,7 +19,6 @@ import PelatihanWorkshop from "./pages/layanan/PelatihanWorkshop";
 import Dashboard from "./pages/Dashboard";
 import ManagemenUsers from "./pages/Dashboard/users";
 import LoginPage from "./pages/Auth/login";
-import Profile from "./pages/Dashboard/profile";
 import DashboardProduct from "./pages/Dashboard/product/productList";
 import DashboardProductCategory from "./pages/Dashboard/product/productCategory";
 import ProtectedRoute from "./services/Protected/ProtectedRoute";
@@ -36,6 +35,10 @@ import MisiManagement from "./pages/Dashboard/profile/MisiManagement";
 import VisiManagement from "./pages/Dashboard/profile/VisiManagement";
 import OrganizationStructureManagement from "./pages/Dashboard/profile/OrganisasiStruktur";
 import DashboardServiceCategoryPage from "./pages/Dashboard/Layanan/Layanan-Category";
+import NewsManagement from "./pages/Dashboard/News-Content";
+import ArticleCategoryManagement from "./pages/Dashboard/Artikel/Category";
+import ArticleManagement from "./pages/Dashboard/Artikel";
+import Profile from "./pages/user/profile";
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -67,7 +70,7 @@ function App() {
         <Route path="/tentang" element={<Tentang />} />
         <Route path="/identifikasi-tanaman" element={<DetectionPage />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/artikel/:slug" element={<ShowArticle />} />
+        <Route path="/artikel/:id" element={<ShowArticle />} />
 
         <Route path="/layanan/griya-jamu" element={<GriyaJamu />} />
         <Route path="/layanan/rawat-jalan" element={<RawatJalan />} />
@@ -93,6 +96,8 @@ function App() {
         <Route path="/layanan/produk-layanan" element={<ProductLayanan />} />
         <Route path="/layanan/produk-layanan/:id" element={<ProductDetail />} />
 
+
+
         <Route
           path="/dashboard"
           element={
@@ -102,6 +107,15 @@ function App() {
           }
         />
         <Route
+          path="/dashboard/berita"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <NewsManagement />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/dashboard/users"
           element={
             <ProtectedRoute requiredRole="admin">
@@ -109,6 +123,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/dashboard/products-list"
           element={
@@ -117,6 +132,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/dashboard/product-category"
           element={
@@ -125,14 +141,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route
-          path="/dashboard/service-category"
-          element={
-            <ProtectedRoute requiredRole="admin">
-              <DasboardServiceCategoryPage />
-            </ProtectedRoute>
-          }
-        />
+        
+      
         <Route
           path="/dashboard/services"
           element={
@@ -202,6 +212,23 @@ function App() {
           element={
             <ProtectedRoute requiredRole="admin">
               <OrganizationStructureManagement />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/dashboard/artikel"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <ArticleManagement />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/artikel-category"
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <ArticleCategoryManagement />
             </ProtectedRoute>
           }
         />

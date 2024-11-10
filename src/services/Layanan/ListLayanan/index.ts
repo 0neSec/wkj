@@ -4,8 +4,8 @@ export interface Service {
     id: number;
     name: string;
     description: string;
-    imageURL: string;
-    serviceCategoryId: number;
+    image_url: string;
+    service_category_id: number;
     serviceCategory?: {
         id: number;
         name: string;
@@ -101,11 +101,40 @@ class ServiceApiClient {
         }
     }
 
+    async getServiceByCategory(categoryId: number): Promise<Service[]> {
+        try {
+            const response = await this.axiosInstance.get<{
+                services: Service[];
+                message?: string;
+            }>('/service/category', {
+                params: { category_id: categoryId }
+            });
+            
+            // Add additional error handling
+            if (response.status === 404) {
+                console.warn('Category not found or no services in this category');
+                return [];
+            }
+            
+            if (response.data.message === "No services found for this category") {
+                return [];
+            }
+            
+            return response.data.services || [];
+        } catch (error) {
+            console.error('Error fetching services by category:', error);
+            // Return empty array instead of throwing to prevent component crash
+            return [];
+        }
+    }
+
+
     async getServices(): Promise<Service[]> {
         try {
             const response = await this.axiosInstance.get<{
                 Service: Service[];
             }>('/service');
+            
             return response.data.Service;
         } catch (error) {
             this.handleError(error, 'Failed to retrieve services');
@@ -118,6 +147,8 @@ class ServiceApiClient {
             const response = await this.axiosInstance.get<{
                 Service: Service;
             }>(`/service/${id}`);
+            console.log("data",response.data.Service);
+            
             return response.data.Service;
         } catch (error) {
             this.handleError(error, 'Failed to retrieve service');

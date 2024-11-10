@@ -1,22 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Eye, MessageCircle, Calendar, User, Share2 } from "lucide-react";
-
+import { Calendar, Share2 } from "lucide-react";
+import { ServiceCategoryContent, serviceCategoryService } from "../services/Layanan/LayananCategory";
+import { Service, serviceApiClient } from "../services/Layanan/ListLayanan";
 import Navbar from "../component/includes/navbar";
 import Footer from "../component/includes/footer";
-import { Article, articleService } from "../services/Artikel";
+
 
 // Skeleton component for loading states
 const Skeleton = ({ className = "" }) => (
   <div className={`animate-pulse bg-gray-200 rounded ${className}`} />
 );
 
-// Article content formatter component
-const ArticleFormatter = ({ content }: { content: string }) => {
-  // Split content into lines
+// Service content formatter component
+const ServiceFormatter = ({ content }: { content: string }) => {
   const lines = content.split('\n');
-  
-  // Process lines into paragraphs and lists
   const elements: JSX.Element[] = [];
   let currentList: JSX.Element[] = [];
   let inList = false;
@@ -36,17 +34,14 @@ const ArticleFormatter = ({ content }: { content: string }) => {
   lines.forEach((line, index) => {
     const trimmedLine = line.trim();
     
-    // Skip empty lines
     if (!trimmedLine) {
       finishList();
       return;
     }
     
-    // Check if line starts with number or dash
     const listMatch = trimmedLine.match(/^(\d+\.|-)(.+)/);
     
     if (listMatch) {
-      // Handle list items
       const [, , content] = listMatch;
       inList = true;
       
@@ -56,7 +51,6 @@ const ArticleFormatter = ({ content }: { content: string }) => {
         </li>
       );
     } else {
-      // Handle paragraphs
       finishList();
       elements.push(
         <p key={index} className="mb-4 text-gray-700">
@@ -66,51 +60,58 @@ const ArticleFormatter = ({ content }: { content: string }) => {
     }
   });
   
-  // Finish any remaining list
   finishList();
   
   return <div className="prose prose-lg max-w-none">{elements}</div>;
 };
 
-const ShowArticle = () => {
+const ShowServiceCategory = () => {
   const { id } = useParams();
-  const [article, setArticle] = useState<Article | null>(null);
+  const [category, setCategory] = useState<ServiceCategoryContent | null>(null);
+  const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showShareTooltip, setShowShareTooltip] = useState(false);
 
   useEffect(() => {
-    const fetchArticle = async () => {
+    const fetchData = async () => {
       if (!id) {
-        setError("Article ID is required");
+        setError("Category ID is required");
         setIsLoading(false);
         return;
       }
 
       try {
-        const articleData = await articleService.getArticleById(parseInt(id));
-        if (articleData) {
-          setArticle(articleData);
+        const [categoryData, servicesData] = await Promise.all([
+          serviceCategoryService.getServiceCategoryById(parseInt(id)),
+          serviceApiClient.getServices()
+        ]);
+
+        if (categoryData) {
+          setCategory(categoryData);
+          const filteredServices = servicesData.filter(
+            service => service.service_category_id === categoryData.id
+          );
+          setServices(filteredServices);
         } else {
-          setError("Article not found");
+          setError("Category not found");
         }
       } catch (err) {
-        setError("Failed to load article");
-        console.error("Error fetching article:", err);
+        setError("Failed to load category and services");
+        console.error("Error fetching data:", err);
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchArticle();
+    fetchData();
   }, [id]);
 
   const handleShare = async () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: article?.name || "",
-          text: article?.description || "",
+          title: category?.name || "",
           url: window.location.href,
         });
       } catch (err) {
@@ -137,7 +138,7 @@ const ShowArticle = () => {
     <div>
       <Navbar />
       <article className="max-w-4xl mx-auto px-4 py-8 mt-10">
-        {/* Article Header */}
+        {/* Category Header */}
         <header className="mb-8">
           {isLoading ? (
             <>
@@ -145,19 +146,18 @@ const ShowArticle = () => {
               <Skeleton className="h-12 w-full mb-4" />
               <div className="flex gap-4">
                 <Skeleton className="h-6 w-32" />
-                <Skeleton className="h-6 w-32" />
               </div>
             </>
           ) : (
             <>
               <div className="flex justify-between items-start mb-4">
                 <div className="inline-block px-3 py-1 text-sm font-semibold text-indigo-600 bg-indigo-100 rounded-full">
-                  {article?.article_category.name}
+                  Medical Services
                 </div>
                 <button
                   className="p-2 hover:bg-gray-100 rounded-full transition-colors relative"
                   onClick={handleShare}
-                  aria-label="Share article"
+                  aria-label="Share category"
                 >
                   <Share2 size={20} />
                   {showShareTooltip && (
@@ -168,13 +168,13 @@ const ShowArticle = () => {
                 </button>
               </div>
               <h1 className="text-4xl font-bold text-gray-900 mb-4">
-                {article?.name}
+                {category?.name}
               </h1>
               <div className="flex flex-wrap items-center gap-6 text-gray-600">
                 <div className="flex items-center gap-2">
                   <Calendar size={18} aria-hidden="true" />
                   <span>
-                    {new Date(article?.created_at || "").toLocaleDateString()}
+                    {new Date(category?.created_at || "").toLocaleDateString()}
                   </span>
                 </div>
               </div>
@@ -182,33 +182,40 @@ const ShowArticle = () => {
           )}
         </header>
 
-        {/* Featured Image */}
-        {isLoading ? (
-          <Skeleton className="w-full h-[400px] rounded-lg mb-8" />
-        ) : (
-          article?.image_url && (
-            <div className="mb-8 rounded-lg overflow-hidden bg-gray-100">
-              <img
-                src={`${process.env.REACT_APP_API_URL}${article.image_url}`}
-                alt={article.name}
-                className="w-full h-[400px] object-cover"
-                loading="lazy"
-              />
-            </div>
-          )
-        )}
-
-        {/* Article Content */}
+        {/* Services List */}
         <div className="prose prose-lg max-w-none">
           {isLoading ? (
             <>
               <Skeleton className="h-6 w-full mb-4" />
               <Skeleton className="h-6 w-11/12 mb-4" />
               <Skeleton className="h-6 w-10/12 mb-4" />
-              <Skeleton className="h-6 w-full mb-4" />
             </>
           ) : (
-            <ArticleFormatter content={article?.description || ""} />
+            <div className="space-y-8">
+              {services.map((service) => (
+                <div key={service.id} className="border-b pb-6 last:border-0">
+                  <h2 className="text-2xl font-semibold text-gray-900 mb-4">
+                    {service.name}
+                  </h2>
+                  {service.image_url && (
+                    <div className="mb-4 rounded-lg overflow-hidden bg-gray-100">
+                      <img
+                        src={`${process.env.REACT_APP_API_URL}${service.image_url}`}
+                        alt={service.name}
+                        className="w-full h-48 object-cover"
+                        loading="lazy"
+                      />
+                    </div>
+                  )}
+                  <ServiceFormatter content={service.description} />
+                </div>
+              ))}
+              {services.length === 0 && (
+                <p className="text-gray-500 text-center py-8">
+                  No services available in this category yet.
+                </p>
+              )}
+            </div>
           )}
         </div>
       </article>
@@ -217,4 +224,4 @@ const ShowArticle = () => {
   );
 };
 
-export default ShowArticle;
+export default ShowServiceCategory;

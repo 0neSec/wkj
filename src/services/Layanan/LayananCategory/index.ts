@@ -3,20 +3,17 @@ import axios, { AxiosError, AxiosInstance } from 'axios';
 export interface ServiceCategoryContent {
     id: number;
     name: string;
-    description?: string;
     created_at: string;
     updated_at: string;
 }
 
 export interface CreateServiceCategoryData {
     name: string;
-    description?: string;
 }
 
 export interface UpdateServiceCategoryData {
     id: number;
     name?: string;
-    description?: string;
 }
 
 class ServiceCategoryService {

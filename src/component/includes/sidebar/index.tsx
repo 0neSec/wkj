@@ -102,8 +102,11 @@ const Sidebar = () => {
       id: "articles",
       label: "Artikel",
       icon: BookOpen,
-      // path: "/articles",
-      path: "#",
+      path: "/dashboard/artikel",
+      submenu: [
+        { label: "Daftar Artikel", path: "/dashboard/artikel" },
+        { label: "Kategori Artikel", path: "/dashboard/artikel-category" },
+      ],
     },
     {
       id: "Berita Management",

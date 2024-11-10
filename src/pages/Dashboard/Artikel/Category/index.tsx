@@ -1,37 +1,33 @@
 import React, { useEffect, useState } from "react";
-import {
-  CreateServiceCategoryData,
-  ServiceCategoryContent,
-  serviceCategoryService,
-  UpdateServiceCategoryData,
-} from "../../../../services/Layanan/LayananCategory";
+import { ArticleCategory, articleCategoryService, CreateArticleCategoryData, UpdateArticleCategoryData } from "../../../../services/Artikel/Category";
 import Navbar from "../../../../component/includes/navbar";
 import Sidebar from "../../../../component/includes/sidebar";
 
-const ServiceCategoryManagement = () => {
+
+const ArticleCategoryManagement = () => {
   // State Management
-  const [categories, setCategories] = useState<ServiceCategoryContent[]>([]);
+  const [categories, setCategories] = useState<ArticleCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] =
-    useState<ServiceCategoryContent | null>(null);
-  const [newCategory, setNewCategory] = useState<CreateServiceCategoryData>({
+  const [editingCategory, setEditingCategory] = useState<ArticleCategory | null>(
+    null
+  );
+  const [newCategory, setNewCategory] = useState<CreateArticleCategoryData>({
     name: "",
   });
   const [searchTerm, setSearchTerm] = useState("");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Data Fetching
   const fetchCategories = async () => {
     try {
       setLoading(true);
-      const response = await serviceCategoryService.getServiceCategories();
+      const response = await articleCategoryService.getArticleCategories();
       setCategories(response);
     } catch (err) {
-      showError("Failed to fetch service categories");
-      console.error("Error fetching service categories:", err);
+      showError("Failed to fetch article categories");
+      console.error("Error fetching article categories:", err);
     } finally {
       setLoading(false);
     }
@@ -66,13 +62,13 @@ const ServiceCategoryManagement = () => {
     }
 
     try {
-      await serviceCategoryService.createServiceCategory(newCategory);
+      await articleCategoryService.createArticleCategory(newCategory);
       await fetchCategories();
-      showSuccess("Service category created successfully");
+      showSuccess("Category created successfully");
       resetForm();
     } catch (err) {
-      showError("Failed to create service category");
-      console.error("Error creating service category:", err);
+      showError("Failed to create category");
+      console.error("Error creating category:", err);
     }
   };
 
@@ -83,40 +79,36 @@ const ServiceCategoryManagement = () => {
     }
 
     try {
-      const updatedData: UpdateServiceCategoryData = {
+      const updatedData: UpdateArticleCategoryData = {
         id: editingCategory.id,
         name: editingCategory.name,
       };
-      await serviceCategoryService.updateServiceCategory(updatedData);
+      await articleCategoryService.updateArticleCategory(updatedData);
       await fetchCategories();
-      showSuccess("Service category updated successfully");
+      showSuccess("Category updated successfully");
       resetForm();
     } catch (err) {
-      showError("Failed to update service category");
-      console.error("Error updating service category:", err);
+      showError("Failed to update category");
+      console.error("Error updating category:", err);
     }
   };
 
   const handleDeleteCategory = async (categoryId: number) => {
-    if (
-      !window.confirm("Are you sure you want to delete this service category?")
-    )
-      return;
+    if (!window.confirm("Are you sure you want to delete this category?")) return;
 
     try {
-      await serviceCategoryService.deleteServiceCategory(categoryId);
+      await articleCategoryService.deleteArticleCategory(categoryId);
       await fetchCategories();
-      showSuccess("Service category deleted successfully");
+      showSuccess("Category deleted successfully");
     } catch (err) {
-      showError("Failed to delete service category");
-      console.error("Error deleting service category:", err);
+      showError("Failed to delete category");
+      console.error("Error deleting category:", err);
     }
   };
 
   // Filtered Data
-  const filteredCategories = categories.filter(
-    (category) =>
-      category.name.toLowerCase().includes(searchTerm.toLowerCase()) 
+  const filteredCategories = categories.filter((category) =>
+    category.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   if (loading) {
@@ -128,7 +120,7 @@ const ServiceCategoryManagement = () => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-50">
       {/* Notification Messages */}
       <div className="fixed top-4 right-4 z-50 space-y-2">
         {successMessage && (
@@ -144,14 +136,17 @@ const ServiceCategoryManagement = () => {
           </div>
         )}
       </div>
+
       <Navbar />
+
       <div className="flex flex-col md:flex-row">
         <Sidebar />
-        <main className="flex-1 p-4 md:p-6 mt-20">
+
+        <main className="flex-1 p-4 md:p-6 mt-10">
           <div className="max-w-8xl mx-auto">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
               <h1 className="text-2xl md:text-3xl font-bold text-gray-800">
-                Service Category Management
+                Article Category Management
               </h1>
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -176,7 +171,6 @@ const ServiceCategoryManagement = () => {
                     <tr>
                       <th className="px-4 py-3 text-left">ID</th>
                       <th className="px-4 py-3 text-left">Name</th>
-                      <th className="px-4 py-3 text-left">Description</th>
                       <th className="px-4 py-3 text-left hidden md:table-cell">
                         Created At
                       </th>
@@ -188,12 +182,13 @@ const ServiceCategoryManagement = () => {
                   </thead>
                   <tbody>
                     {filteredCategories.map((category) => (
-                      <tr
-                        key={category.id}
-                        className="border-b hover:bg-gray-50"
-                      >
+                      <tr key={category.id} className="border-b hover:bg-gray-50">
                         <td className="px-4 py-3">{category.id}</td>
-                        <td className="px-4 py-3">{category.name}</td>
+                        <td className="px-4 py-3">
+                          <div className="max-w-xs md:max-w-md truncate">
+                            {category.name}
+                          </div>
+                        </td>
                         <td className="px-4 py-3 hidden md:table-cell">
                           {new Date(category.created_at).toLocaleDateString()}
                         </td>
@@ -232,13 +227,11 @@ const ServiceCategoryManagement = () => {
       {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full">
             <div className="p-6">
               <div className="flex justify-between items-center mb-4">
                 <h2 className="text-xl font-bold">
-                  {editingCategory
-                    ? "Edit Service Category"
-                    : "Add New Service Category"}
+                  {editingCategory ? "Edit Category" : "Add New Category"}
                 </h2>
                 <button
                   onClick={() => setIsModalOpen(false)}
@@ -260,32 +253,22 @@ const ServiceCategoryManagement = () => {
                 </button>
               </div>
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Category Name
-                  </label>
-                  <input
-                    type="text"
-                    value={
-                      editingCategory ? editingCategory.name : newCategory.name
+                <input
+                  type="text"
+                  value={editingCategory ? editingCategory.name : newCategory.name}
+                  onChange={(e) => {
+                    if (editingCategory) {
+                      setEditingCategory({
+                        ...editingCategory,
+                        name: e.target.value,
+                      });
+                    } else {
+                      setNewCategory({ name: e.target.value });
                     }
-                    onChange={(e) => {
-                      if (editingCategory) {
-                        setEditingCategory({
-                          ...editingCategory,
-                          name: e.target.value,
-                        });
-                      } else {
-                        setNewCategory({
-                          ...newCategory,
-                          name: e.target.value,
-                        });
-                      }
-                    }}
-                    placeholder="Enter category name..."
-                    className="border px-4 py-2 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+                  }}
+                  placeholder="Enter category name..."
+                  className="border px-4 py-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
                 <div className="flex flex-col md:flex-row justify-end gap-4">
                   <button
                     onClick={() => setIsModalOpen(false)}
@@ -295,9 +278,7 @@ const ServiceCategoryManagement = () => {
                   </button>
                   <button
                     onClick={
-                      editingCategory
-                        ? handleUpdateCategory
-                        : handleCreateCategory
+                      editingCategory ? handleUpdateCategory : handleCreateCategory
                     }
                     className="w-full md:w-auto bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
                   >
@@ -313,4 +294,4 @@ const ServiceCategoryManagement = () => {
   );
 };
 
-export default ServiceCategoryManagement;
+export default ArticleCategoryManagement;
