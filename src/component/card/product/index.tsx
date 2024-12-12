@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Filter, X } from 'lucide-react';
+import { Search, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 // Product Data Type
@@ -62,15 +62,103 @@ const productData: Product[] = [
     category: 'Herbal Drinks',
     image: 'assets/sinom.webp'
   },
+  // Add more products here to simulate more items
   {
     id: 7,
-    name: 'Herbal Sinom',
-    description: 'Traditional Indonesian herbal drink',
-    price: 16000,
-    category: 'Herbal Drinks',
-    image: 'assets/sinom.webp'
+    name: 'Rosella Tea',
+    description: 'Antioxidant-rich herbal tea',
+    price: 14000,
+    category: 'Herbal Teas',
+    image: 'assets/rosella-tea.webp'
   },
-  // Add more products here
+  {
+    id: 8,
+    name: 'Sambiloto Extract',
+    description: 'Natural immunity booster',
+    price: 22000,
+    category: 'Herbal Supplements',
+    image: 'assets/sambiloto.webp'
+  },
+  {
+    id: 8,
+    name: 'Sambiloto Extract',
+    description: 'Natural immunity booster',
+    price: 22000,
+    category: 'Herbal Supplements',
+    image: 'assets/sambiloto.webp'
+  },
+  {
+    id: 8,
+    name: 'Sambiloto Extract',
+    description: 'Natural immunity booster',
+    price: 22000,
+    category: 'Herbal Supplements',
+    image: 'assets/sambiloto.webp'
+  },
+  {
+    id: 8,
+    name: 'Sambiloto Extract',
+    description: 'Natural immunity booster',
+    price: 22000,
+    category: 'Herbal Supplements',
+    image: 'assets/sambiloto.webp'
+  },
+  {
+    id: 8,
+    name: 'Sambiloto Extract',
+    description: 'Natural immunity booster',
+    price: 22000,
+    category: 'Herbal Supplements',
+    image: 'assets/sambiloto.webp'
+  },
+  {
+    id: 8,
+    name: 'Sambiloto Extract',
+    description: 'Natural immunity booster',
+    price: 22000,
+    category: 'Herbal Supplements',
+    image: 'assets/sambiloto.webp'
+  },
+  {
+    id: 8,
+    name: 'Sambiloto Extract',
+    description: 'Natural immunity booster',
+    price: 22000,
+    category: 'Herbal Supplements',
+    image: 'assets/sambiloto.webp'
+  },
+  {
+    id: 8,
+    name: 'Sambiloto Extract',
+    description: 'Natural immunity booster',
+    price: 22000,
+    category: 'Herbal Supplements',
+    image: 'assets/sambiloto.webp'
+  },
+  {
+    id: 8,
+    name: 'Sambiloto Extract',
+    description: 'Natural immunity booster',
+    price: 22000,
+    category: 'Herbal Supplements',
+    image: 'assets/sambiloto.webp'
+  },
+  {
+    id: 8,
+    name: 'Sambiloto Extract',
+    description: 'Natural immunity booster',
+    price: 22000,
+    category: 'Herbal Supplements',
+    image: 'assets/sambiloto.webp'
+  },
+  {
+    id: 8,
+    name: 'Sambiloto Extract',
+    description: 'Natural immunity booster',
+    price: 22000,
+    category: 'Herbal Supplements',
+    image: 'assets/sambiloto.webp'
+  }
 ];
 
 // Categories
@@ -81,6 +169,9 @@ const categories = [
   'Herbal Teas',
   'Traditional Mixtures'
 ];
+
+// Pagination Options
+const paginationOptions = [10, 25, 50, 100];
 
 // Product Card Component
 const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
@@ -123,13 +214,38 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [productsPerPage, setProductsPerPage] = useState(isHomePage ? 6 : 12);
 
   // Filter products based on search and category
   const filteredProducts = productData.filter(product => 
     (isHomePage ? true : 
       (product.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
       (selectedCategory === 'All' || product.category === selectedCategory))
-  )).slice(0, isHomePage ? 6 : undefined);
+  ));
+
+  // Pagination Calculations
+  const indexOfLastProduct = currentPage * productsPerPage;
+  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
+  const currentProducts = filteredProducts.slice(
+    isHomePage ? 0 : indexOfFirstProduct, 
+    isHomePage ? 6 : indexOfLastProduct
+  );
+
+  // Calculate total pages
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+
+  // Pagination Change Handlers
+  const handlePageChange = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
+
+  const handleProductsPerPageChange = (number: number) => {
+    setProductsPerPage(number);
+    setCurrentPage(1); // Reset to first page when changing products per page
+  };
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -149,7 +265,10 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
               type="text" 
               placeholder="Search products..." 
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setCurrentPage(1); // Reset to first page when searching
+              }}
               className="w-full px-4 py-2 border rounded-full pl-10"
             />
             <Search size={20} className="absolute left-3 top-3 text-gray-400" />
@@ -223,11 +342,72 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
 
         {/* Product Grid */}
         <div className={`${!isHomePage ? 'md:w-[calc(100%-16rem)]' : 'w-full'}`}>
+          {/* Product Grid */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-            {filteredProducts.map(product => (
+            {currentProducts.map(product => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
+
+          {/* Pagination Controls (only for product page, not home page) */}
+          {!isHomePage && (
+            <div className="mt-8 flex flex-col md:flex-row justify-between items-center">
+              {/* Products Per Page Selector */}
+              <div className="mb-4 md:mb-0">
+                <label htmlFor="products-per-page" className="mr-2">
+                  Products per page:
+                </label>
+                <select
+                  id="products-per-page"
+                  value={productsPerPage}
+                  onChange={(e) => handleProductsPerPageChange(Number(e.target.value))}
+                  className="border rounded px-2 py-1"
+                >
+                  {paginationOptions.map(option => (
+                    <option key={option} value={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Pagination Navigation */}
+              <div className="flex items-center space-x-2">
+                {/* Previous Button */}
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronLeft size={20} />
+                </button>
+
+                {/* Page Numbers */}
+                {[...Array(totalPages)].map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handlePageChange(index + 1)}
+                    className={`px-4 py-2 border rounded ${
+                      currentPage === index + 1 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-white text-gray-700'
+                    }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+
+                {/* Next Button */}
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ChevronRight size={20} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>

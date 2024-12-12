@@ -19,7 +19,7 @@ export default function Home() {
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="container mx-auto px-4 py-16 text-center"
+        className="container mx-auto px-4 md:px-8 lg:px-16 py-16 text-center"
       >
         <div className="flex items-center justify-center mb-8 relative">
           <motion.span
@@ -78,7 +78,7 @@ export default function Home() {
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="container mx-auto px-4 py-16 text-center"
+        className="container mx-auto px-4 md:px-8 lg:px-16 py-16 text-center"
       >
         <div className="flex items-center justify-center mb-8 relative">
           <motion.span
@@ -137,7 +137,7 @@ export default function Home() {
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="container mx-auto px-4 py-16 text-center"
+        className="container mx-auto px-4 md:px-8 lg:px-16 py-16 text-center"
       >
         <div className="flex items-center justify-center mb-8 relative">
           <motion.span

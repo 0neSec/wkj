@@ -4,6 +4,9 @@ import Home from './page/Home';
 import HerbalDetectionPage from './page/detection';
 import ProductPage from './page/product';
 import StoresPage from './page/stores';
+import LoginPage from './page/auth/login';
+import ProdusenPage from './page/produsen';
+import RegisterPage from './page/auth/register';
 
 function App() {
   return (
@@ -14,6 +17,9 @@ function App() {
           <Route element={<HerbalDetectionPage/>} path='/detection_tanaman'/>
           <Route element={<ProductPage/>} path='/product'/>
           <Route element={<StoresPage/>} path='/store'/>
+          <Route element={<ProdusenPage/>} path='/produsen'/>
+          <Route element={<LoginPage/>} path='/login'/>
+          <Route element={<RegisterPage/>} path='/register'/>
         </Routes>
       </Router>
     </>
