@@ -6,6 +6,7 @@ import HomeBanner from "../component/hero";
 import ProductList from "../component/card/product";
 import StoreList from "../component/card/store";
 import HerbalDetection from "../component/card/detection";
+import Footer from "../component/footer";
 
 export default function Home() {
   return (
@@ -189,6 +190,8 @@ export default function Home() {
           <StoreList isHomePage={true} />
         </motion.div>
       </motion.div>
+
+      <Footer/>
     </div>
   );
 }

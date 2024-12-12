@@ -27,10 +27,10 @@ const Navbar = () => {
   }, []);
 
   const menuItems: MenuItem[] = [
-    { label: 'Beranda', href: '#' },
-    { label: 'Identifikasi Tanaman', href: '#' },
-    { label: 'Farmakope Herbal', href: '#' },
-    { label: 'Jamu Indonesia', href: '#' },
+    { label: 'Beranda', href: '/' },
+    { label: 'Identifikasi Tanaman', href: '/detection_tanaman' },
+    { label: 'Farmakope Herbal', href: '/product' },
+    { label: 'Jamu Indonesia', href: '/store' },
     { label: 'Produsen Jamu', href: '#' }
   ];
 
@@ -52,7 +52,6 @@ const Navbar = () => {
             alt="Logo" 
             className="h-14 w-auto rounded-full"
           />
-          <span className="font-bold text-2xl text-blue-800">WKJ</span>
         </motion.div>
 
         {/* Desktop Navigation */}

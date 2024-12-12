@@ -62,6 +62,14 @@ const productData: Product[] = [
     category: 'Herbal Drinks',
     image: 'assets/sinom.webp'
   },
+  {
+    id: 7,
+    name: 'Herbal Sinom',
+    description: 'Traditional Indonesian herbal drink',
+    price: 16000,
+    category: 'Herbal Drinks',
+    image: 'assets/sinom.webp'
+  },
   // Add more products here
 ];
 
