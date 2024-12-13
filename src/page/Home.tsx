@@ -11,7 +11,7 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 
 export default function Home() {
   return (
-    <div className="bg-white">\
+    <div className="bg-white">
     <SpeedInsights/>
       <Navbar />
       <HomeBanner />
