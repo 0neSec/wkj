@@ -7,6 +7,7 @@ import StoresPage from './page/stores';
 import LoginPage from './page/auth/login';
 import ProdusenPage from './page/produsen';
 import RegisterPage from './page/auth/register';
+import { SpeedInsights } from "@vercel/speed-insights/react"
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route element={<StoresPage/>} path='/store'/>
           <Route element={<ProdusenPage/>} path='/produsen'/>
           <Route element={<LoginPage/>} path='/login'/>
+          
           <Route element={<RegisterPage/>} path='/register'/>
         </Routes>
       </Router>

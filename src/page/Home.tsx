@@ -7,10 +7,12 @@ import ProductList from "../component/card/product";
 import StoreList from "../component/card/store";
 import HerbalDetection from "../component/card/detection";
 import Footer from "../component/footer";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 export default function Home() {
   return (
-    <div className="bg-white">
+    <div className="bg-white">\
+    <SpeedInsights/>
       <Navbar />
       <HomeBanner />
 
