@@ -19,20 +19,22 @@ export interface Product {
     morphology: string;
     area_name: string;
     efficacy: string;
-    utilization?: string[];
-    composition?: string[];
-    image: string;
+    utilization?: string;
+    composition?: string;
+    image:  File | string;
     research_results: string;
     description: string;
     price: number;
     unit_type: string;
     product_category_id: number;
+    product_category_name: string;
     product_category?: ProductCategory;
     created_at: string;
     updated_at: string;
 }
 
 export interface CreateProductData {
+    id?: number;
     name?: string;
     latin_name?: string;
     synonym?: string;
@@ -44,8 +46,8 @@ export interface CreateProductData {
     area_name?: string;
     efficacy?: string;
     image?: File | string;
-    utilization?: string[];
-    composition?: string[];
+    utilization?: string;
+    composition?: string;
     research_results?: string;
     description?: string;
     price?: number;

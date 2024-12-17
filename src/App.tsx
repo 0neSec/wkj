@@ -15,6 +15,8 @@ import DashboardUserPage from './page/dashboard/user';
 import DashboardFooterContent1Page from './page/dashboard/footer/alamat';
 import DashboardFooterContent2Page from './page/dashboard/footer/maps';
 import DashboardFooterContent3Page from './page/dashboard/footer/contact';
+import DashboardJamuCenterPage from './page/dashboard/central';
+import DashboardProdusenPage from './page/dashboard/produsen';
 
 function App() {
   return (
@@ -30,8 +32,10 @@ function App() {
           <Route element={<RegisterPage/>} path='/register'/>
           <Route element={<Dashboard/>} path='/dashboard'/>
           <Route element={<DashboardUserPage/>} path='/dashboard/users'/>
-          <Route element={<DashboardHerbalStorePage/>} path='/dashboard/store'/>
+          <Route element={<DashboardJamuCenterPage/>} path='/dashboard/center'/>
+          {/* <Route element={<DashboardHerbalStorePage/>} path='/dashboard/store'/> */}
           <Route element={<DashboardProductPage/>} path='/dashboard/products'/>
+          <Route element={<DashboardProdusenPage/>} path='/dashboard/produsen'/>
           <Route element={<DashboardProductCategoryPage/>} path='/dashboard/products/category'/>
           <Route element={<DashboardFooterContent1Page/>} path='/dashboard/footer/alamat'/>
           <Route element={<DashboardFooterContent2Page/>} path='/dashboard/footer/maps'/>

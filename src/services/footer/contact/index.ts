@@ -57,7 +57,7 @@ class FooterContent3Service {
         try {
             const response = await this.axiosInstance.get<{
                 FooterContent3: FooterContent3[];
-            }>('/footer/content-3');
+            }>('/content/footer/content-3');
             return response.data.FooterContent3;
         } catch (error) {
             this.handleError(error, 'Failed to retrieve footer content 3');

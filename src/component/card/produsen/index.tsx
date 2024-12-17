@@ -1,122 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, MapPin, Award } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-// Tipe Data Produsen Jamu
-interface ProdusenJamu {
-  id: number;
-  nama: string;
-  deskripsi: string;
-  lokasi: string;
-  spesialitas: string;
-  gambar: string;
-  tahunBerdiri: number;
-  sertifikasi: string[];
-}
-
-// Data Contoh Produsen Jamu
-const dataProdusenJamu: ProdusenJamu[] = [
-  {
-    id: 1,
-    nama: 'Sido Muncul',
-    deskripsi: 'Produsen obat herbal tradisional legendaris',
-    lokasi: 'Semarang, Jawa Tengah',
-    spesialitas: 'Formulasi Jamu Tradisional',
-    gambar: 'assets/jamu-producer-1.webp',
-    tahunBerdiri: 1940,
-    sertifikasi: ['Bersertifikat BPOM', 'Bersertifikat Halal']
-  },
-  {
-    id: 2,
-    nama: 'Air Mancur',
-    deskripsi: 'Merek kesehatan herbal terkenal dengan keahlian lintas generasi',
-    lokasi: 'Solo, Jawa Tengah',
-    spesialitas: 'Tonik dan Suplemen Herbal',
-    gambar: 'assets/jamu-producer-2.webp',
-    tahunBerdiri: 1963,
-    sertifikasi: ['Bersertifikat BPOM', 'Bahan Organik']
-  },
-  {
-    id: 3,
-    nama: 'Deltomed',
-    deskripsi: 'Perusahaan obat herbal tradisional inovatif',
-    lokasi: 'Yogyakarta',
-    spesialitas: 'Formulasi Jamu Modern',
-    gambar: 'assets/jamu-producer-3.webp',
-    tahunBerdiri: 1985,
-    sertifikasi: ['Bersertifikat BPOM', 'Praktik Berkelanjutan']
-  },
-  {
-    id: 4,
-    nama: 'Cap Nyonya Meneer',
-    deskripsi: 'Produsen jamu milik keluarga bersejarah',
-    lokasi: 'Semarang, Jawa Tengah',
-    spesialitas: 'Ramuan Herbal Klasik',
-    gambar: 'assets/jamu-producer-4.webp',
-    tahunBerdiri: 1919,
-    sertifikasi: ['Merek Warisan', 'Resep Tradisional']
-  },
-  {
-    id: 5,
-    nama: 'Mustika Ratu',
-    deskripsi: 'Merek kecantikan dan kesehatan herbal modern',
-    lokasi: 'Jakarta',
-    spesialitas: 'Produk Kecantikan dan Kesehatan Herbal',
-    gambar: 'assets/jamu-producer-5.webp',
-    tahunBerdiri: 1978,
-    sertifikasi: ['Pemenang Penghargaan Kecantikan', 'Bersertifikat BPOM']
-  },
-  {
-    id: 6,
-    nama: 'NASA Herbal',
-    deskripsi: 'Produsen produk herbal alami dan organik',
-    lokasi: 'Surakarta',
-    spesialitas: 'Solusi Herbal Organik',
-    gambar: 'assets/jamu-producer-6.webp',
-    tahunBerdiri: 2005,
-    sertifikasi: ['Sertifikasi Organik', 'Produksi Berkelanjutan']
-  }
-];
+import { jamuManufactureService, JamuManufacture } from '../../../services/produsen'; // Adjust import path
 
 // Komponen Kartu Produsen Jamu
-const KartuProdusen: React.FC<{ produsen: ProdusenJamu }> = ({ produsen }) => {
+const KartuProdusen: React.FC<{ produsen: JamuManufacture }> = ({ produsen }) => {
   return (
     <motion.div 
       whileHover={{ scale: 1.05 }}
       className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-2xl"
     >
-      <img 
-        src={produsen.gambar} 
-        alt={produsen.nama} 
-        className="w-full h-48 object-cover"
-      />
+      {produsen.image && (
+        <img 
+          src={`${process.env.REACT_APP_API_URL}${produsen.image}`} 
+          alt={produsen.name} 
+          className="w-full h-48 object-cover"
+        />
+      )}
       <div className="p-4">
-        <h3 className="font-bold text-xl mb-2 text-gray-800">{produsen.nama}</h3>
-        <p className="text-gray-600 mb-2">{produsen.deskripsi}</p>
+        <h3 className="font-bold text-xl mb-2 text-gray-800">{produsen.name}</h3>
+        <p className="text-gray-600 mb-2">{produsen.description}</p>
         <div className="space-y-2">
           <div className="flex items-center text-sm text-gray-500">
             <MapPin size={16} className="mr-2 text-green-600" />
             <span className="font-semibold mr-2">Lokasi:</span>
-            {produsen.lokasi}
+            {produsen.address}
           </div>
           <div className="flex items-center text-sm text-gray-500">
             <Award size={16} className="mr-2 text-yellow-600" />
-            <span className="font-semibold mr-2">Tahun Berdiri:</span>
-            {produsen.tahunBerdiri}
-          </div>
-          <div className="flex items-center text-sm text-gray-500">
-            <span className="font-semibold mr-2">Spesialitas:</span>
-            {produsen.spesialitas}
+            <span className="font-semibold mr-2">Didirikan:</span>
+            {new Date(produsen.created_at).getFullYear()}
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
-            {produsen.sertifikasi.map((sertifikat, index) => (
-              <span 
-                key={index} 
-                className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full"
-              >
-                {sertifikat}
-              </span>
-            ))}
+            {/* Optional: Add dynamic badges or certification tags */}
+            <a 
+              href={produsen.link_website} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full"
+            >
+              Website
+            </a>
+            <a 
+              href={produsen.link_facebook} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full"
+            >
+              Facebook
+            </a>
           </div>
         </div>
       </div>
@@ -126,24 +58,62 @@ const KartuProdusen: React.FC<{ produsen: ProdusenJamu }> = ({ produsen }) => {
 
 // Komponen Daftar Produsen Jamu
 const DaftarProdusenJamu: React.FC = () => {
+  const [produsenJamu, setProdusenJamu] = useState<JamuManufacture[]>([]);
+  const [muatanData, setMuatanData] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [kataPencarian, setKataPencarian] = useState('');
 
+  // Ambil data saat komponen dimuat
+  useEffect(() => {
+    const muatProdusen = async () => {
+      try {
+        const data = await jamuManufactureService.getJamuManufactures();
+        setProdusenJamu(data);
+        setMuatanData(false);
+      } catch (kesalahan) {
+        console.error('Gagal memuat produsen jamu:', kesalahan);
+        setError('Gagal memuat data produsen jamu');
+        setMuatanData(false);
+      }
+    };
+
+    muatProdusen();
+  }, []);
+
   // Filter produsen berdasarkan kata pencarian
-  const produsenTerfilter = dataProdusenJamu.filter(produsen => 
-    produsen.nama.toLowerCase().includes(kataPencarian.toLowerCase()) ||
-    produsen.lokasi.toLowerCase().includes(kataPencarian.toLowerCase()) ||
-    produsen.spesialitas.toLowerCase().includes(kataPencarian.toLowerCase())
+  const produsenTerfilter = produsenJamu.filter(produsen => 
+    produsen.name.toLowerCase().includes(kataPencarian.toLowerCase()) ||
+    produsen.address.toLowerCase().includes(kataPencarian.toLowerCase()) ||
+    produsen.description.toLowerCase().includes(kataPencarian.toLowerCase())
   );
 
+  // Tampilan loading
+  if (muatanData) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-green-500"></div>
+      </div>
+    );
+  }
+
+  // Tampilan error
+  if (error) {
+    return (
+      <div className="flex justify-center items-center min-h-screen text-red-500">
+        {error}
+      </div>
+    );
+  }
+
   return (
-    <div className=" min-h-screen">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 py-12">
         {/* Kotak Pencarian */}
         <div className="mb-8 max-w-xl mx-auto">
           <div className="relative">
             <input 
               type="text" 
-              placeholder="Cari produsen berdasarkan nama, lokasi, atau spesialitas..." 
+              placeholder="Cari produsen berdasarkan nama, lokasi, atau deskripsi..." 
               value={kataPencarian}
               onChange={(e) => setKataPencarian(e.target.value)}
               className="w-full px-4 py-3 border-2 border-green-200 rounded-full pl-10 focus:outline-none focus:border-green-500 transition-all"

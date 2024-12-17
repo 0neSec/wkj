@@ -80,46 +80,58 @@ const Sidebar: React.FC = () => {
         { label: "Kategori Produk", path: "/dashboard/products/category" },
       ],
     },
+    // {
+    //   id: "productStore",
+    //   label: "Herbal Store", // New Product Store Menu
+    //   icon: ShoppingBag, // You can use the same icon or a new one
+    //   path: "/dashboard/store", // Set the path for the herbal store
+    // },
     {
-      id: "productStore",
-      label: "Herbal Store", // New Product Store Menu
+      id: "JamuCenter",
+      label: "Jamu Center", // New Product Store Menu
       icon: ShoppingBag, // You can use the same icon or a new one
-      path: "/dashboard/store", // Set the path for the herbal store
+      path: "/dashboard/center", // Set the path for the herbal store
     },
     {
-      id: "content",
-      label: "Manajemen Konten",
-      icon: BookOpen,
-      path: "/dashboard/content",
-      submenu: [
-        { label: "Tentang Kami", path: "/dashboard/content/tentang" },
-        { label: "Tugas", path: "/dashboard/content/task" },
-        { label: "Fungsi", path: "/dashboard/content/fungsi" },
-        { label: "Visi", path: "/dashboard/content/visi" },
-        { label: "Misi", path: "/dashboard/content/misi" },
-        { label: "Sejarah", path: "/dashboard/content/sejarah" },
-        { label: "Struktur Organisasi", path: "/dashboard/content/struktur" },
-      ],
+      id: "JamuProdusen",
+      label: "Jamu Produsen", // New Product Store Menu
+      icon: ShoppingBag, // You can use the same icon or a new one
+      path: "/dashboard/produsen", // Set the path for the herbal store
     },
-    {
-      id: "banner",
-      label: "Banner",
-      icon: Wrench,
-      path: "/dashboard/banner",
-    },
-    {
-      id: "footer",
-      label: "Footer",
-      icon: ClipboardList,
-      path: "/dashboard/footer",
-      submenu: [
-        { label: "Alamat", path: "/dashboard/footer/alamat" },
-        { label: "Maps", path: "/dashboard/footer/maps" },
-        { label: "Kontak", path: "/dashboard/footer/contact" },
-        { label: "Timeline", path: "/dashboard/footer/timeline" },
-        { label: "Social Media", path: "/dashboard/footer/social-media" },
-      ],
-    },
+    // {
+    //   id: "content",
+    //   label: "Manajemen Konten",
+    //   icon: BookOpen,
+    //   path: "/dashboard/content",
+    //   submenu: [
+    //     { label: "Tentang Kami", path: "/dashboard/content/tentang" },
+    //     { label: "Tugas", path: "/dashboard/content/task" },
+    //     { label: "Fungsi", path: "/dashboard/content/fungsi" },
+    //     { label: "Visi", path: "/dashboard/content/visi" },
+    //     { label: "Misi", path: "/dashboard/content/misi" },
+    //     { label: "Sejarah", path: "/dashboard/content/sejarah" },
+    //     { label: "Struktur Organisasi", path: "/dashboard/content/struktur" },
+    //   ],
+    // },
+    // {
+    //   id: "banner",
+    //   label: "Banner",
+    //   icon: Wrench,
+    //   path: "/dashboard/banner",
+    // },
+    // {
+    //   id: "footer",
+    //   label: "Footer",
+    //   icon: ClipboardList,
+    //   path: "/dashboard/footer",
+    //   submenu: [
+    //     { label: "Alamat", path: "/dashboard/footer/alamat" },
+    //     { label: "Maps", path: "/dashboard/footer/maps" },
+    //     { label: "Kontak", path: "/dashboard/footer/contact" },
+    //     { label: "Timeline", path: "/dashboard/footer/timeline" },
+    //     { label: "Social Media", path: "/dashboard/footer/social-media" },
+    //   ],
+    // },
   ];
   
 

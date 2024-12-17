@@ -1,165 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion } from 'framer-motion';
-
-// Product Data Type
-interface Product {
-  id: number;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image: string;
-}
-
-// Sample Product Data
-const productData: Product[] = [
-  {
-    id: 1,
-    name: 'Jamu Kunyit Asam',
-    description: 'Traditional herbal drink for digestion',
-    price: 15000,
-    category: 'Herbal Drinks',
-    image: 'assets/jamu-kunyit-asam.webp'
-  },
-  {
-    id: 2,
-    name: 'Jamu Beras Kencur',
-    description: 'Herbal mixture for stamina and health',
-    price: 18000,
-    category: 'Herbal Drinks',
-    image: 'assets/jamu-beras-kencur.webp'
-  },
-  {
-    id: 3,
-    name: 'Temulawak Extract',
-    description: 'Natural supplement for liver health',
-    price: 25000,
-    category: 'Herbal Supplements',
-    image: 'assets/temulawak.webp'
-  },
-  {
-    id: 4,
-    name: 'Ginger Herbal Tea',
-    description: 'Warming herbal tea for immunity',
-    price: 12000,
-    category: 'Herbal Teas',
-    image: 'assets/ginger-tea.webp'
-  },
-  {
-    id: 5,
-    name: 'Jamu Galian Singset',
-    description: 'Herbal mixture for body fitness',
-    price: 20000,
-    category: 'Herbal Drinks',
-    image: 'assets/galian-singset.webp'
-  },
-  {
-    id: 6,
-    name: 'Herbal Sinom',
-    description: 'Traditional Indonesian herbal drink',
-    price: 16000,
-    category: 'Herbal Drinks',
-    image: 'assets/sinom.webp'
-  },
-  // Add more products here to simulate more items
-  {
-    id: 7,
-    name: 'Rosella Tea',
-    description: 'Antioxidant-rich herbal tea',
-    price: 14000,
-    category: 'Herbal Teas',
-    image: 'assets/rosella-tea.webp'
-  },
-  {
-    id: 8,
-    name: 'Sambiloto Extract',
-    description: 'Natural immunity booster',
-    price: 22000,
-    category: 'Herbal Supplements',
-    image: 'assets/sambiloto.webp'
-  },
-  {
-    id: 8,
-    name: 'Sambiloto Extract',
-    description: 'Natural immunity booster',
-    price: 22000,
-    category: 'Herbal Supplements',
-    image: 'assets/sambiloto.webp'
-  },
-  {
-    id: 8,
-    name: 'Sambiloto Extract',
-    description: 'Natural immunity booster',
-    price: 22000,
-    category: 'Herbal Supplements',
-    image: 'assets/sambiloto.webp'
-  },
-  {
-    id: 8,
-    name: 'Sambiloto Extract',
-    description: 'Natural immunity booster',
-    price: 22000,
-    category: 'Herbal Supplements',
-    image: 'assets/sambiloto.webp'
-  },
-  {
-    id: 8,
-    name: 'Sambiloto Extract',
-    description: 'Natural immunity booster',
-    price: 22000,
-    category: 'Herbal Supplements',
-    image: 'assets/sambiloto.webp'
-  },
-  {
-    id: 8,
-    name: 'Sambiloto Extract',
-    description: 'Natural immunity booster',
-    price: 22000,
-    category: 'Herbal Supplements',
-    image: 'assets/sambiloto.webp'
-  },
-  {
-    id: 8,
-    name: 'Sambiloto Extract',
-    description: 'Natural immunity booster',
-    price: 22000,
-    category: 'Herbal Supplements',
-    image: 'assets/sambiloto.webp'
-  },
-  {
-    id: 8,
-    name: 'Sambiloto Extract',
-    description: 'Natural immunity booster',
-    price: 22000,
-    category: 'Herbal Supplements',
-    image: 'assets/sambiloto.webp'
-  },
-  {
-    id: 8,
-    name: 'Sambiloto Extract',
-    description: 'Natural immunity booster',
-    price: 22000,
-    category: 'Herbal Supplements',
-    image: 'assets/sambiloto.webp'
-  },
-  {
-    id: 8,
-    name: 'Sambiloto Extract',
-    description: 'Natural immunity booster',
-    price: 22000,
-    category: 'Herbal Supplements',
-    image: 'assets/sambiloto.webp'
-  },
-  {
-    id: 8,
-    name: 'Sambiloto Extract',
-    description: 'Natural immunity booster',
-    price: 22000,
-    category: 'Herbal Supplements',
-    image: 'assets/sambiloto.webp'
-  }
-];
+import { productService, Product } from '../../../services/product/product.service'; // Adjust import path as needed
+import { productCategoryService } from '../../../services/product/product-category.service';
 
 // Categories
 const categories = [
@@ -181,7 +24,7 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
       className="bg-white rounded-xl shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-2xl"
     >
       <img 
-        src={product.image} 
+        src={`${process.env.REACT_APP_API_URL}${product.image}`} 
         alt={product.name} 
         className="w-full h-48 object-cover"
       />
@@ -211,19 +54,46 @@ interface ProductListProps {
 }
 
 const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
+  const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage, setProductsPerPage] = useState(isHomePage ? 6 : 12);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [categories, setCategories] = useState<string[]>(['All']);
+  const [selectedCategory, setSelectedCategory] = useState('All');
+
+  // Fetch products on component mount
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const fetchedProducts = await productService.getAllProductsWithCategories();
+        const fetchedCategories = await productCategoryService.getAllProductCategories();
+        setCategories([
+          'All', 
+          ...fetchedCategories.map(category => category.name)
+        ]);
+        setProducts(fetchedProducts);
+        setIsLoading(false);
+      } catch (err) {
+        console.error('Failed to fetch products', err);
+        setError('Failed to load products. Please try again later.');
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   // Filter products based on search and category
-  const filteredProducts = productData.filter(product => 
+  const filteredProducts = products.filter(product => 
     (isHomePage ? true : 
       (product.name.toLowerCase().includes(searchTerm.toLowerCase()) && 
-      (selectedCategory === 'All' || product.category === selectedCategory))
+      (selectedCategory === 'All' || product.product_category_name === selectedCategory))
   ));
 
   // Pagination Calculations
@@ -246,6 +116,24 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
     setProductsPerPage(number);
     setCurrentPage(1); // Reset to first page when changing products per page
   };
+
+  // Render loading state
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-12 text-center">
+        <p className="text-xl">Loading products...</p>
+      </div>
+    );
+  }
+
+  // Render error state
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-12 text-center">
+        <p className="text-xl text-red-500">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-12">
@@ -342,71 +230,80 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
 
         {/* Product Grid */}
         <div className={`${!isHomePage ? 'md:w-[calc(100%-16rem)]' : 'w-full'}`}>
-          {/* Product Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-            {currentProducts.map(product => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-
-          {/* Pagination Controls (only for product page, not home page) */}
-          {!isHomePage && (
-            <div className="mt-8 flex flex-col md:flex-row justify-between items-center">
-              {/* Products Per Page Selector */}
-              <div className="mb-4 md:mb-0">
-                <label htmlFor="products-per-page" className="mr-2">
-                  Products per page:
-                </label>
-                <select
-                  id="products-per-page"
-                  value={productsPerPage}
-                  onChange={(e) => handleProductsPerPageChange(Number(e.target.value))}
-                  className="border rounded px-2 py-1"
-                >
-                  {paginationOptions.map(option => (
-                    <option key={option} value={option}>
-                      {option}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Pagination Navigation */}
-              <div className="flex items-center space-x-2">
-                {/* Previous Button */}
-                <button
-                  onClick={() => handlePageChange(currentPage - 1)}
-                  disabled={currentPage === 1}
-                  className="px-4 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <ChevronLeft size={20} />
-                </button>
-
-                {/* Page Numbers */}
-                {[...Array(totalPages)].map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handlePageChange(index + 1)}
-                    className={`px-4 py-2 border rounded ${
-                      currentPage === index + 1 
-                        ? 'bg-blue-600 text-white' 
-                        : 'bg-white text-gray-700'
-                    }`}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
-
-                {/* Next Button */}
-                <button
-                  onClick={() => handlePageChange(currentPage + 1)}
-                  disabled={currentPage === totalPages}
-                  className="px-4 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <ChevronRight size={20} />
-                </button>
-              </div>
+          {/* If no products found */}
+          {currentProducts.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-xl text-gray-500">No products found</p>
             </div>
+          ) : (
+            <>
+              {/* Product Grid */}
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                {currentProducts.map(product => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+
+              {/* Pagination Controls (only for product page, not home page) */}
+              {!isHomePage && totalPages > 1 && (
+                <div className="mt-8 flex flex-col md:flex-row justify-between items-center">
+                  {/* Products Per Page Selector */}
+                  <div className="mb-4 md:mb-0">
+                    <label htmlFor="products-per-page" className="mr-2">
+                      Products per page:
+                    </label>
+                    <select
+                      id="products-per-page"
+                      value={productsPerPage}
+                      onChange={(e) => handleProductsPerPageChange(Number(e.target.value))}
+                      className="border rounded px-2 py-1"
+                    >
+                      {paginationOptions.map(option => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Pagination Navigation */}
+                  <div className="flex items-center space-x-2">
+                    {/* Previous Button */}
+                    <button
+                      onClick={() => handlePageChange(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      className="px-4 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronLeft size={20} />
+                    </button>
+
+                    {/* Page Numbers */}
+                    {[...Array(totalPages)].map((_, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handlePageChange(index + 1)}
+                        className={`px-4 py-2 border rounded ${
+                          currentPage === index + 1 
+                            ? 'bg-blue-600 text-white' 
+                            : 'bg-white text-gray-700'
+                        }`}
+                      >
+                        {index + 1}
+                      </button>
+                    ))}
+
+                    {/* Next Button */}
+                    <button
+                      onClick={() => handlePageChange(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      className="px-4 py-2 border rounded disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <ChevronRight size={20} />
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
