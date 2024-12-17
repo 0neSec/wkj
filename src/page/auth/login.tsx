@@ -1,17 +1,52 @@
 import React, { useState, FormEvent } from 'react';
 import { motion } from 'framer-motion';
 import { LogIn, User, Lock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { authService, LoginData } from '../../services/auth.service'; // Adjust import path as needed
 import Navbar from '../../component/navbar';
 import Footer from '../../component/footer';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const [rememberMe, setRememberMe] = useState<boolean>(false);
+  const [error, setError] = useState<string>('');
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Add login logic here
-    console.log('Login attempted with:', { email, password });
+    setError(''); // Reset any previous errors
+
+    try {
+      const loginData: LoginData = {
+        email,
+        password,
+        rememberMe
+      };
+
+      // Attempt login
+      const response = await authService.login(loginData);
+
+      // If login is successful
+      console.log('Login successful', response);
+      
+      // Redirect based on user role
+      switch(response.role) {
+        case 'admin':
+          navigate('/');
+          break;
+        case 'user':
+          navigate('/');
+          break;
+        default:
+          navigate('/dashboard');
+      }
+    } catch (err: any) {
+      // Handle login errors
+      const errorMessage = err.error || 'Login failed. Please try again.';
+      setError(errorMessage);
+      console.error('Login error:', err);
+    }
   };
 
   return (
@@ -22,7 +57,7 @@ const LoginPage: React.FC = () => {
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="flex-grow flex items-center justify-center  py-12 px-4 sm:px-6 lg:px-8 mt-20"
+        className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 mt-20"
       >
         <div className="max-w-md w-full space-y-8 bg-white p-10 rounded-xl shadow-2xl">
           <div className="text-center">
@@ -41,6 +76,13 @@ const LoginPage: React.FC = () => {
               Sign in to access your herbal health account
             </p>
           </div>
+
+          {error && (
+            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+              <span className="block sm:inline">{error}</span>
+            </div>
+          )}
+
           <form 
             onSubmit={handleSubmit} 
             className="mt-8 space-y-6"
@@ -95,6 +137,8 @@ const LoginPage: React.FC = () => {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                   className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
@@ -126,7 +170,7 @@ const LoginPage: React.FC = () => {
           <div className="text-center mt-4">
             <p className="text-sm text-gray-600">
               Don't have an account?{' '}
-              <a href="#" className="font-medium text-green-600 hover:text-green-500">
+              <a href="/register" className="font-medium text-green-600 hover:text-green-500">
                 Sign up
               </a>
             </p>

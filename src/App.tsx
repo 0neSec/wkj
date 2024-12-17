@@ -7,7 +7,14 @@ import StoresPage from './page/stores';
 import LoginPage from './page/auth/login';
 import ProdusenPage from './page/produsen';
 import RegisterPage from './page/auth/register';
-import { SpeedInsights } from "@vercel/speed-insights/react"
+import Dashboard from './page/dashboard';
+import DashboardProductPage from './page/dashboard/product';
+import DashboardProductCategoryPage from './page/dashboard/product/category';
+import DashboardHerbalStorePage from './page/dashboard/store';
+import DashboardUserPage from './page/dashboard/user';
+import DashboardFooterContent1Page from './page/dashboard/footer/alamat';
+import DashboardFooterContent2Page from './page/dashboard/footer/maps';
+import DashboardFooterContent3Page from './page/dashboard/footer/contact';
 
 function App() {
   return (
@@ -20,8 +27,15 @@ function App() {
           <Route element={<StoresPage/>} path='/store'/>
           <Route element={<ProdusenPage/>} path='/produsen'/>
           <Route element={<LoginPage/>} path='/login'/>
-          
           <Route element={<RegisterPage/>} path='/register'/>
+          <Route element={<Dashboard/>} path='/dashboard'/>
+          <Route element={<DashboardUserPage/>} path='/dashboard/users'/>
+          <Route element={<DashboardHerbalStorePage/>} path='/dashboard/store'/>
+          <Route element={<DashboardProductPage/>} path='/dashboard/products'/>
+          <Route element={<DashboardProductCategoryPage/>} path='/dashboard/products/category'/>
+          <Route element={<DashboardFooterContent1Page/>} path='/dashboard/footer/alamat'/>
+          <Route element={<DashboardFooterContent2Page/>} path='/dashboard/footer/maps'/>
+          <Route element={<DashboardFooterContent3Page/>} path='/dashboard/footer/contact'/>
         </Routes>
       </Router>
     </>
