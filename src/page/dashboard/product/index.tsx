@@ -25,6 +25,7 @@ const DashboardProductPage: React.FC = () => {
   const [productCategories, setProductCategories] = useState<ProductCategory[]>(
     []
   );
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -47,6 +48,7 @@ const DashboardProductPage: React.FC = () => {
       ]);
       setProducts(fetchedProducts);
       setProductCategories(fetchedCategories);
+      setCategories(fetchedCategories);
       setIsLoading(false);
     } catch (err) {
       setError("Failed to fetch products or categories");
@@ -311,6 +313,28 @@ const DashboardProductPage: React.FC = () => {
                       className="w-full px-3 py-2 border rounded-lg text-sm focus:ring-green-500 focus:outline-none"
                     />
                   </div>
+                  <div className="mb-4">
+                    <label className="block text-gray-700 mb-2">
+                      Product Category
+                    </label>
+                    <select
+                      value={currentProduct.product_category_id || ""}
+                      onChange={(e) =>
+                        setCurrentProduct({
+                          ...currentProduct,
+                          product_category_id: parseInt(e.target.value),
+                        })
+                      }
+                      className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                    >
+                      <option value="">Select Category</option>
+                      {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                          {category.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                   <div>
                     <label className="block mb-2 text-sm font-medium">
                       Image
@@ -352,6 +376,7 @@ const DashboardProductPage: React.FC = () => {
                       )}
                     </div>
                   </div>
+
                   <div>
                     <label className="block mb-2 text-sm font-medium">
                       Price

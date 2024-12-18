@@ -17,6 +17,8 @@ import DashboardFooterContent2Page from './page/dashboard/footer/maps';
 import DashboardFooterContent3Page from './page/dashboard/footer/contact';
 import DashboardJamuCenterPage from './page/dashboard/central';
 import DashboardProdusenPage from './page/dashboard/produsen';
+import ProductDetail from './component/product/detail';
+import ProtectedRoute from './services/Protected/ProtectedRoute';
 
 function App() {
   return (
@@ -26,11 +28,17 @@ function App() {
           <Route element={<Home/>} path='/'/>
           <Route element={<HerbalDetectionPage/>} path='/detection_tanaman'/>
           <Route element={<ProductPage/>} path='/product'/>
+          <Route element={<ProductDetail/>} path='/product/:id'/>
           <Route element={<StoresPage/>} path='/store'/>
           <Route element={<ProdusenPage/>} path='/produsen'/>
           <Route element={<LoginPage/>} path='/login'/>
           <Route element={<RegisterPage/>} path='/register'/>
-          <Route element={<Dashboard/>} path='/dashboard'/>
+          <Route element={
+            <ProtectedRoute requiredRole="admin">
+            <Dashboard/>
+            </ProtectedRoute>
+            } path='/dashboard'
+            />
           <Route element={<DashboardUserPage/>} path='/dashboard/users'/>
           <Route element={<DashboardJamuCenterPage/>} path='/dashboard/center'/>
           {/* <Route element={<DashboardHerbalStorePage/>} path='/dashboard/store'/> */}

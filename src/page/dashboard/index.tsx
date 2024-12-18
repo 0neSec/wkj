@@ -4,17 +4,21 @@ import {
   LineChart, Line, AreaChart, Area
 } from 'recharts';
 import { 
-  Users, DollarSign, PackageIcon,
+  Users, DollarSign, PackageIcon, Globe,
   Menu, X
 } from 'lucide-react';
 import { productService } from '../../services/product/product.service';
 import Sidebar from '../../component/sidebar';
+import { visitorService } from '../../services/visitor';
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [productCount, setProductCount] = useState(0);
+  const [visitorCount, setVisitorCount] = useState(0);
+  const [visitorData, setVisitorData] = useState<any[]>([]);
+  const [recentVisitors, setRecentVisitors] = useState<any[]>([]);
   
-  // Sample data for charts
+  // Sample data for existing charts
   const monthlyRevenue = [
     { name: 'Jan', amount: 4500 },
     { name: 'Feb', amount: 5200 },
@@ -42,20 +46,51 @@ const Dashboard = () => {
     { month: 'Jun', participants: 300 }
   ];
 
-  // Fetch product counts
+  // Fetch counts and visitors
   useEffect(() => {
-    const fetchCounts = async () => {
+    const fetchData = async () => {
       try {
         // Fetch product count
         const products = await productService.getAllProducts();
         setProductCount(products.length);
+
+        // Fetch visitor count
+        const totalVisitors = await visitorService.getVisitorCount();
+        setVisitorCount(totalVisitors);
+
+        // Fetch all visitors and process for charts and recent list
+        const allVisitors = await visitorService.getAllVisitors();
+        
+        // Prepare visitor data for monthly chart
+        const processedVisitorData = processVisitorData(allVisitors);
+        setVisitorData(processedVisitorData);
+
+        // Get 10 most recent visitors
+        const sortedVisitors = allVisitors
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 10);
+        setRecentVisitors(sortedVisitors);
       } catch (error) {
-        console.error('Failed to fetch counts', error);
+        console.error('Failed to fetch data', error);
       }
     };
 
-    fetchCounts();
+    fetchData();
   }, []);
+
+  // Process visitor data for monthly chart
+  const processVisitorData = (visitors: any[]) => {
+    const monthMap = new Map();
+    
+    visitors.forEach(visitor => {
+      const date = new Date(visitor.created_at);
+      const monthKey = date.toLocaleString('default', { month: 'short' });
+      
+      monthMap.set(monthKey, (monthMap.get(monthKey) || 0) + 1);
+    });
+
+    return Array.from(monthMap, ([name, visitors]) => ({ name, visitors }));
+  };
 
   const statCards = [
     {
@@ -75,6 +110,12 @@ const Dashboard = () => {
       value: productCount.toString(),
       icon: PackageIcon,
       colorClass: 'bg-orange-50 text-orange-500'
+    },
+    {
+      title: 'Total Kunjungan',
+      value: visitorCount.toString(),
+      icon: Globe,
+      colorClass: 'bg-purple-50 text-purple-500'
     }
   ];
 
@@ -97,7 +138,7 @@ const Dashboard = () => {
             </div>
 
             {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
               {statCards.map((stat, index) => (
                 <div key={index} className="bg-white rounded-xl shadow-sm p-4 lg:p-6">
                   <div className="flex items-center justify-between">
@@ -139,52 +180,51 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              {/* Users Chart */}
+              {/* Visitors Chart */}
               <div className="bg-white rounded-xl shadow-sm p-4 lg:p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Statistik Pengguna</h3>
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Kunjungan Bulanan</h3>
                 <div className="h-60 lg:h-80">
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={userStats}>
+                    <BarChart data={visitorData}>
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                      <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                       <YAxis tick={{ fontSize: 12 }} />
                       <Tooltip />
-                      <Line 
-                        type="monotone" 
-                        dataKey="active" 
-                        stroke="#3B82F6" 
-                        strokeWidth={2}
-                        name="Pengguna Aktif"
+                      <Bar 
+                        dataKey="visitors" 
+                        fill="#10B981"
+                        radius={[4, 4, 0, 0]}
+                        name="Kunjungan"
                       />
-                      <Line 
-                        type="monotone" 
-                        dataKey="new" 
-                        stroke="#10B981" 
-                        strokeWidth={2}
-                        name="Pengguna Baru"
-                      />
-                    </LineChart>
+                    </BarChart>
                   </ResponsiveContainer>
                 </div>
               </div>
 
-              {/* Training Participants */}
-              <div className="bg-white rounded-xl shadow-sm p-4 lg:p-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Peserta Pelatihan</h3>
-                <div className="h-60 lg:h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={trainingData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-                      <YAxis tick={{ fontSize: 12 }} />
-                      <Tooltip />
-                      <Bar 
-                        dataKey="participants" 
-                        fill="#8B5CF6"
-                        radius={[4, 4, 0, 0]}
-                      />
-                    </BarChart>
-                  </ResponsiveContainer>
+              {/* Recent Visitors Table */}
+              <div className="bg-white rounded-xl shadow-sm p-4 lg:p-6 lg:col-span-2">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">10 Kunjungan Terbaru</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm text-left text-gray-500">
+                    <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                      <tr>
+                        <th className="px-4 py-3">IP Address</th>
+                        <th className="px-4 py-3">User Agent</th>
+                        <th className="px-4 py-3">Waktu Kunjungan</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {recentVisitors.map((visitor) => (
+                        <tr key={visitor.id} className="border-b">
+                          <td className="px-4 py-3">{visitor.ip_address}</td>
+                          <td className="px-4 py-3 max-w-xs truncate">{visitor.user_agent}</td>
+                          <td className="px-4 py-3">
+                            {new Date(visitor.created_at).toLocaleString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>

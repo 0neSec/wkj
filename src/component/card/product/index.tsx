@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Filter, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, Filter, X, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { productService, Product } from '../../../services/product/product.service'; // Adjust import path as needed
 import { productCategoryService } from '../../../services/product/product-category.service';
+import { useNavigate } from 'react-router-dom';
 
 // Categories
 const categories = [
@@ -16,8 +17,13 @@ const categories = [
 // Pagination Options
 const paginationOptions = [10, 25, 50, 100];
 
+type OnDetailClickType = (productOrId: Product | number) => void;
+
 // Product Card Component
-const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
+const ProductCard: React.FC<{ 
+  product: Product, 
+  onDetailClick: OnDetailClickType 
+}> = ({ product, onDetailClick }) => {
   return (
     <motion.div 
       whileHover={{ scale: 1.05 }}
@@ -35,18 +41,29 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => {
           <span className="text-blue-600 font-semibold text-lg">
             Rp {product.price.toLocaleString()}
           </span>
-          <motion.button
-            whileHover={{ scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition"
-          >
-            Add to Cart
-          </motion.button>
+          <div className="flex space-x-2">
+            <motion.button
+              onClick={() => onDetailClick(product.id)}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="bg-green-600 text-white px-3 py-2 rounded-full hover:bg-green-700 transition flex items-center"
+            >
+              <Eye size={16} className="mr-1" /> Detail
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="bg-blue-600 text-white px-4 py-2 rounded-full hover:bg-blue-700 transition"
+            >
+              Add to Cart
+            </motion.button>
+          </div>
         </div>
       </div>
     </motion.div>
   );
 };
+
 
 // Product Listing Component
 interface ProductListProps {
@@ -65,6 +82,8 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>(['All']);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+  const navigate = useNavigate();
 
   // Fetch products on component mount
   useEffect(() => {
@@ -115,6 +134,15 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
   const handleProductsPerPageChange = (number: number) => {
     setProductsPerPage(number);
     setCurrentPage(1); // Reset to first page when changing products per page
+  };
+  const handleProductDetail = (productOrId: Product | number) => {
+    if (typeof productOrId === 'number') {
+      // Navigate to product detail page
+      navigate(`/product/${productOrId}`);
+    } else {
+      // If you still want to keep the old modal logic
+      setSelectedProduct(productOrId);
+    }
   };
 
   // Render loading state
@@ -240,7 +268,8 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
               {/* Product Grid */}
               <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                 {currentProducts.map(product => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard key={product.id} product={product}  
+                  onDetailClick={handleProductDetail}/>
                 ))}
               </div>
 
