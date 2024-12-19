@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, MapPin, Award } from 'lucide-react';
+import { MapPin, Award, Search } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { jamuManufactureService, JamuManufacture } from '../../../services/produsen'; // Adjust import path
 
-// Komponen Kartu Produsen Jamu
+// Komponen Kartu Produsen Jamu (unchanged)
 const KartuProdusen: React.FC<{ produsen: JamuManufacture }> = ({ produsen }) => {
   return (
     <motion.div 
@@ -32,7 +32,6 @@ const KartuProdusen: React.FC<{ produsen: JamuManufacture }> = ({ produsen }) =>
             {new Date(produsen.created_at).getFullYear()}
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
-            {/* Optional: Add dynamic badges or certification tags */}
             <a 
               href={produsen.link_website} 
               target="_blank" 
@@ -56,8 +55,10 @@ const KartuProdusen: React.FC<{ produsen: JamuManufacture }> = ({ produsen }) =>
   );
 };
 
-// Komponen Daftar Produsen Jamu
-const DaftarProdusenJamu: React.FC = () => {
+// Komponen Daftar Produsen Jamu with Optional Search
+const DaftarProdusenJamu: React.FC<{ isHomePage?: boolean }> = ({ 
+  isHomePage = false 
+}) => {
   const [produsenJamu, setProdusenJamu] = useState<JamuManufacture[]>([]);
   const [muatanData, setMuatanData] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,11 +82,13 @@ const DaftarProdusenJamu: React.FC = () => {
   }, []);
 
   // Filter produsen berdasarkan kata pencarian
-  const produsenTerfilter = produsenJamu.filter(produsen => 
-    produsen.name.toLowerCase().includes(kataPencarian.toLowerCase()) ||
-    produsen.address.toLowerCase().includes(kataPencarian.toLowerCase()) ||
-    produsen.description.toLowerCase().includes(kataPencarian.toLowerCase())
-  );
+  const produsenTerfilter = isHomePage 
+    ? produsenJamu.slice(0, 3) // Hanya tampilkan 3 produsen di halaman home
+    : produsenJamu.filter(produsen => 
+        produsen.name.toLowerCase().includes(kataPencarian.toLowerCase()) ||
+        produsen.address.toLowerCase().includes(kataPencarian.toLowerCase()) ||
+        produsen.description.toLowerCase().includes(kataPencarian.toLowerCase())
+      );
 
   // Tampilan loading
   if (muatanData) {
@@ -108,19 +111,21 @@ const DaftarProdusenJamu: React.FC = () => {
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 py-12">
-        {/* Kotak Pencarian */}
-        <div className="mb-8 max-w-xl mx-auto">
-          <div className="relative">
-            <input 
-              type="text" 
-              placeholder="Cari produsen berdasarkan nama, lokasi, atau deskripsi..." 
-              value={kataPencarian}
-              onChange={(e) => setKataPencarian(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-green-200 rounded-full pl-10 focus:outline-none focus:border-green-500 transition-all"
-            />
-            <Search size={20} className="absolute left-3 top-3 text-green-400" />
+        {/* Kotak Pencarian (hanya ditampilkan jika bukan halaman home) */}
+        {!isHomePage && (
+          <div className="mb-8 max-w-xl mx-auto">
+            <div className="relative">
+              <input 
+                type="text" 
+                placeholder="Cari produsen berdasarkan nama, lokasi, atau deskripsi..." 
+                value={kataPencarian}
+                onChange={(e) => setKataPencarian(e.target.value)}
+                className="w-full px-4 py-3 border-2 border-green-200 rounded-full pl-10 focus:outline-none focus:border-green-500 transition-all"
+              />
+              <Search size={20} className="absolute left-3 top-3 text-green-400" />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Grid Produsen */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
@@ -129,8 +134,8 @@ const DaftarProdusenJamu: React.FC = () => {
           ))}
         </div>
 
-        {/* Status Tidak Ada Hasil */}
-        {produsenTerfilter.length === 0 && (
+        {/* Status Tidak Ada Hasil (hanya ditampilkan jika bukan halaman home) */}
+        {!isHomePage && produsenTerfilter.length === 0 && (
           <div className="text-center text-gray-500 mt-12">
             Tidak ada produsen jamu yang ditemukan sesuai pencarian Anda.
           </div>

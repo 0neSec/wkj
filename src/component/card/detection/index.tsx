@@ -1,264 +1,463 @@
-import React, { useState, useRef, ChangeEvent, useCallback } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  Camera, 
-  Upload, 
-  X, 
-  Leaf, 
-  Droplet, 
-  Search, 
-  FileQuestion,
-  SwitchCamera 
-} from 'lucide-react';
-import { detectionService, DetectionResult, ModelType } from '../../../services/Detection';
+import React, { useState, useRef, useEffect } from "react";
+import { Camera, Upload, X, Loader, ImageIcon, SwitchCamera, AlertTriangle, Leaf } from "lucide-react";
+import Webcam from "react-webcam";
+import { useNavigate } from "react-router-dom";
+import { ErrorBoundary } from 'react-error-boundary';
+import { motion } from "framer-motion";
+import { DetectionResult, detectionService, ModelType } from "../../../services/Detection";
+import { Product, productService } from "../../../services/product/product.service";
 
-// Type definitions (kept from original)
-interface HerbalOption {
-  value: ModelType | '';
-  label: string;
-  icon: React.ReactNode;
+
+// Error Fallback Component
+function ErrorFallback({error, resetErrorBoundary}: {error: Error, resetErrorBoundary: () => void}) {
+  return (
+    <div role="alert" className="bg-red-50 border border-red-200 p-4 rounded-lg text-center">
+      <div className="flex justify-center mb-4">
+        <AlertTriangle className="text-red-500" size={48} />
+      </div>
+      <p className="text-red-600 font-bold mb-2">Terjadi Kesalahan</p>
+      <p className="text-red-500 mb-4">{error.message}</p>
+      <button 
+        onClick={resetErrorBoundary}
+        className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+      >
+        Coba Lagi
+      </button>
+    </div>
+  );
 }
 
-const HerbalDetection: React.FC = () => {
-  const [selectedHerbal, setSelectedHerbal] = useState<ModelType | ''>('');
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [detectionResult, setDetectionResult] = useState<DetectionResult | null>(null);
-  const [cameraMode, setCameraMode] = useState<'environment' | 'user'>('environment');
+interface Category {
+  value: ModelType;
+  label: string;
+  description?: string;
+}
+
+function ImageDetection() {
+  const navigate = useNavigate();
+  
+  // States
+  const [useCamera, setUseCamera] = useState<boolean>(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string>("");
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [showWebcam, setShowWebcam] = useState<boolean>(false);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [detectionResult, setDetectionResult] = useState<DetectionResult | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
+  const [currentCameraIndex, setCurrentCameraIndex] = useState<number>(0);
+  const [videoConstraints, setVideoConstraints] = useState<MediaTrackConstraints>({
+    facingMode: { ideal: "environment" } // Prioritize back camera
+  });
 
+  const webcamRef = useRef<Webcam>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  const herbalOptions: HerbalOption[] = [
-    { value: '', label: 'Select Herbal Type', icon: <FileQuestion className="mr-2" /> },
-    { value: 'leaf', label: 'Daun (Leaf)', icon: <Leaf className="mr-2 text-green-500" /> },
-    { value: 'fruit', label: 'Buah (Fruit)', icon: <Droplet className="mr-2 text-orange-600" /> },
-    { value: 'rhizome', label: 'Rimpang (Rhizome)', icon: <Droplet className="mr-2 text-yellow-600" /> }
+  const categories: Category[] = [
+    { 
+      value: "rhizome", 
+      label: "Rimpang", 
+      description: "Deteksi tanaman dengan fokus pada rimpang" 
+    },
+    { 
+      value: "fruit", 
+      label: "Buah", 
+      description: "Deteksi dan identifikasi berbagai jenis buah" 
+    },
+    { 
+      value: "leaf", 
+      label: "Daun", 
+      description: "Analisis dan pengenalan jenis daun" 
+    },
   ];
 
-  const handleFileUpload = async (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  // Helper Functions
+  const dataURLtoFile = (dataUrl: string, filename: string): File => {
+    const arr = dataUrl.split(",");
+    const mime = arr[0].match(/:(.*?);/)?.[1] ?? "image/jpeg";
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  };
+
+  // Get available video input devices
+  const getVideoDevices = async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      const videoInputDevices = devices.filter(device => device.kind === 'videoinput');
+      
+      if (videoInputDevices.length === 0) {
+        setCameraError("Tidak ada kamera yang tersedia");
+        return;
+      }
+
+      setVideoDevices(videoInputDevices);
+      setCameraError(null);
+      
+      // Set initial camera constraints based on available devices
+      if (videoInputDevices.length > 0) {
+        const backCamera = videoInputDevices.find(device => 
+          device.label.toLowerCase().includes('back') || 
+          device.label.toLowerCase().includes('rear')
+        );
+
+        setVideoConstraints({
+          deviceId: { 
+            ideal: backCamera ? backCamera.deviceId : videoInputDevices[0].deviceId 
+          }
+        });
+      }
+    } catch (err) {
+      console.error("Error accessing camera devices:", err);
+      setCameraError("Gagal mengakses kamera. Pastikan izin kamera diaktifkan.");
+    }
+  };
+
+  // Switch between cameras
+  const switchCamera = () => {
+    if (videoDevices.length > 1) {
+      const nextIndex = (currentCameraIndex + 1) % videoDevices.length;
+      setCurrentCameraIndex(nextIndex);
+      setVideoConstraints({
+        deviceId: { ideal: videoDevices[nextIndex].deviceId }
+      });
+    }
+  };
+
+  // Use effect to get video devices when camera is activated
+  useEffect(() => {
+    if (useCamera) {
+      getVideoDevices();
+    }
+  }, [useCamera]);
+
+  // Modified handleSubmit with direct navigation
+  const handleSubmit = async () => {
+    if (!selectedCategory) {
+      setError("Silakan pilih kategori terlebih dahulu");
+      return;
+    }
+
+    if (!imageFile) {
+      setError("Silakan pilih atau ambil gambar terlebih dahulu");
+      return;
+    }
+
+    setIsLoading(true);
+    setError("");
+    setRelatedProducts([]);
+
+    try {
+      // Get detection result
+      const result = await detectionService.createDetection({
+        file: imageFile,
+        model: selectedCategory as ModelType,
+      });
+
+      if (result) {
+        setDetectionResult(result);
+        // Navigate directly using the label from the result
+        navigate(`/product/${result.label}`);
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Gagal memproses gambar. Silakan coba lagi.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Enhanced file change handler
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       try {
-        // Reset previous states
+        // More comprehensive file validation
+        if (!['image/jpeg', 'image/png', 'image/jpg'].includes(file.type)) {
+          throw new Error("Format gambar tidak didukung. Gunakan JPEG atau PNG.");
+        }
+        
+        if (file.size > 10 * 1024 * 1024) { // 10MB limit
+          throw new Error("Ukuran gambar terlalu besar. Maksimal 10MB.");
+        }
+
+        detectionService.validateFile(file);
+        setImageFile(file);
+        setCapturedImage(URL.createObjectURL(file));
+        setError("");
         setDetectionResult(null);
-        setError(null);
-        setIsLoading(true);
-
-        // Read file for preview
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setSelectedImage(reader.result as string);
-        };
-        reader.readAsDataURL(file);
-
-        // If no herbal type selected, use first available model
-        const modelType = selectedHerbal || detectionService.getModelTypes()[0];
-
-        // Perform detection
-        const result = await detectionService.createDetection({
-          file,
-          model: modelType as ModelType
-        });
-
-        setDetectionResult(result);
+        setRelatedProducts([]);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Deteksi gagal');
-        setSelectedImage(null);
-      } finally {
-        setIsLoading(false);
+        setError(err instanceof Error ? err.message : "Error validating file");
+        setImageFile(null);
+        setCapturedImage(null);
       }
     }
   };
 
-  const clearImage = () => {
-    setSelectedImage(null);
+  // Camera toggle method
+  const toggleCamera = () => {
+    setUseCamera(!useCamera);
+    if (!useCamera) {
+      setShowWebcam(true);
+      setCapturedImage(null);
+      setImageFile(null);
+      setDetectionResult(null);
+      setRelatedProducts([]);
+      setCameraError(null);
+    } else {
+      setShowWebcam(false);
+    }
+  };
+
+  const captureImage = () => {
+    if (webcamRef.current) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      if (imageSrc) {
+        setCapturedImage(imageSrc);
+        const file = dataURLtoFile(imageSrc, "captured-image.jpg");
+        setImageFile(file);
+        setError("");
+        setShowWebcam(false);
+        setDetectionResult(null);
+        setRelatedProducts([]);
+      }
+    }
+  };
+
+  const resetImage = () => {
+    setCapturedImage(null);
+    setImageFile(null);
+    setError("");
+    setShowWebcam(true);
     setDetectionResult(null);
-    setError(null);
+    setRelatedProducts([]);
   };
 
-  const triggerFileInput = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
   };
-
-  const triggerCameraInput = () => {
-    if (cameraInputRef.current) {
-      cameraInputRef.current.click();
-    }
-  };
-
-  const toggleCameraMode = useCallback(() => {
-    setCameraMode(prev => prev === 'environment' ? 'user' : 'environment');
-  }, []);
 
   return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.5 }}
-      className="container mx-auto px-4 py-6 sm:py-12 w-full max-w-md sm:max-w-xl"
+    <ErrorBoundary 
+      FallbackComponent={ErrorFallback}
+      onReset={() => {
+        // Reset the state of your app here
+        setError("");
+        setCapturedImage(null);
+        setImageFile(null);
+      }}
     >
-      <div className="bg-white shadow-2xl rounded-2xl p-4 sm:p-6 border-2 border-green-100">
-        {/* Herbal Type Select */}
-        <div className="mb-4 sm:mb-6">
-          <div className="relative">
-            <select
-              value={selectedHerbal}
-              onChange={(e) => setSelectedHerbal(e.target.value as ModelType | '')}
-              className="w-full px-3 py-2 sm:px-4 sm:py-3 border-2 border-green-300 rounded-lg 
-                         focus:outline-none focus:ring-2 focus:ring-green-500 
-                         appearance-none text-green-800 font-semibold text-sm sm:text-base"
-            >
-              {herbalOptions.map((option) => (
-                <option 
-                  key={option.value} 
-                  value={option.value} 
-                  className="flex items-center"
-                >
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 sm:px-3 text-green-700">
-              <Search className="w-4 h-4 sm:w-5 sm:h-5" />
-            </div>
-          </div>
-        </div>
+      <div className="flex flex-col min-h-screen ">
 
-        {/* Image Preview and Detection Area */}
-        <motion.div 
-          className="mb-4 sm:mb-6 h-48 sm:h-64 border-2 border-dashed border-green-200 
-                     rounded-2xl flex items-center justify-center relative 
-                     overflow-hidden"
-          initial={{ scale: 0.9, opacity: 0.7 }}
-          animate={{ scale: 1, opacity: 1 }}
-        >
-          {isLoading ? (
-            <div className="text-green-600 text-center">
-              <div className="animate-spin mb-2">🌿</div>
-              <p className="text-sm sm:text-lg font-medium">Memproses deteksi...</p>
-            </div>
-          ) : selectedImage ? (
-            <>
-              <img 
-                src={selectedImage} 
-                alt="Uploaded" 
-                className="max-h-full max-w-full object-contain rounded-lg"
-              />
-              <button 
-                onClick={clearImage}
-                className="absolute top-2 right-2 bg-red-500 text-white 
-                           rounded-full p-1 hover:bg-red-600 transition"
-              >
-                <X className="w-4 h-4 sm:w-5 sm:h-5" />
-              </button>
-            </>
-          ) : (
-            <div className="text-center text-green-600">
-              <Camera className="mx-auto mb-2 w-8 h-8 sm:w-12 sm:h-12 animate-pulse" />
-              <p className="text-sm sm:text-lg font-medium">Upload or Capture Herbal Image</p>
-            </div>
-          )}
-        </motion.div>
 
-        {/* Error Handling */}
-        {error && (
-          <div className="bg-red-50 border-2 border-red-200 rounded-2xl p-3 mb-4 text-red-700">
-            {error}
-          </div>
-        )}
-
-        {/* Hidden File Inputs */}
-        <input 
-          type="file" 
-          ref={fileInputRef}
-          className="hidden" 
-          accept="image/*"
-          onChange={handleFileUpload}
-        />
-        <input 
-          type="file" 
-          ref={cameraInputRef}
-          className="hidden" 
-          accept="image/*"
-          capture={cameraMode}
-          onChange={handleFileUpload}
-        />
-
-        {/* Action Buttons */}
-        <div className="flex justify-center space-x-2 sm:space-x-4 mb-4 sm:mb-6">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={triggerFileInput}
-            className="flex items-center bg-green-500 text-white px-3 py-2 sm:px-5 sm:py-3 
-                       rounded-lg hover:bg-green-600 transition shadow-md text-sm sm:text-base"
-          >
-            <Upload className="mr-1 sm:mr-2 w-4 h-4 sm:w-5 sm:h-5" />
-            Upload
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={triggerCameraInput}
-            className="flex items-center bg-green-700 text-white px-3 py-2 sm:px-5 sm:py-3 
-                       rounded-lg hover:bg-green-800 transition shadow-md 
-                       relative text-sm sm:text-base"
-          >
-            <Camera className="mr-1 sm:mr-2 w-4 h-4 sm:w-5 sm:h-5" />
-            Capture
-            <motion.button
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleCameraMode();
-              }}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              className="absolute -top-1 sm:-top-2 -right-1 sm:-right-2 bg-white text-green-700 
-                         rounded-full p-1 shadow-md border border-green-200 w-5 h-5 sm:w-auto sm:h-auto"
-              title={cameraMode === 'environment' ? 'Switch to Front Camera' : 'Switch to Back Camera'}
-            >
-              <SwitchCamera className="w-3 h-3 sm:w-4 sm:h-4" />
-            </motion.button>
-          </motion.button>
-        </div>
-
-        {/* Detection Result */}
-        {detectionResult && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-green-50 border-2 border-green-200 rounded-2xl p-3 sm:p-4"
-          >
-            <h3 className="text-xl sm:text-2xl font-bold text-green-800 mb-2 sm:mb-3 flex items-center">
-              <Leaf className="mr-2 text-green-600 w-5 h-5 sm:w-6 sm:h-6" />
-              {detectionResult.label}
-            </h3>
-            <div className="flex items-center mb-2">
-              <span className="font-semibold mr-2 text-sm sm:text-base">Confidence:</span>
-              <div className="w-full bg-green-200 rounded-full h-1.5 sm:h-2.5">
-                <div 
-                  className="bg-green-600 h-1.5 sm:h-2.5 rounded-full" 
-                  style={{ width: `${detectionResult.confidence * 100}%` }}
-                ></div>
+        <main className="flex-grow container mx-auto px-4 py-8 mt-10 md:mt-16 lg:mt-12">
+          <div className="max-w-xl lg:max-w-2xl mx-auto bg-white rounded-lg shadow-lg p-4 md:p-6 lg:p-8">
+            {/* Header with centered icon */}
+            
+            <div className="mb-8 text-center">
+              <div className="flex justify-center mb-4">
+                <div className="p-4 bg-blue-50 rounded-full">
+                  <ImageIcon size={48} className="text-blue-500" />
+                </div>
               </div>
-              <span className="ml-2 text-green-800 text-sm sm:text-base">
-                {Math.round(detectionResult.confidence * 100)}%
-              </span>
+              <h1 className="text-2xl font-bold text-gray-800">Deteksi Gambar</h1>
+              <p className="text-gray-600 mt-2">
+                Unggah atau ambil gambar untuk deteksi
+              </p>
             </div>
-            <div>
-              <h4 className="font-semibold text-green-800 mb-1 sm:mb-2 text-sm sm:text-base">
-                Model Type: {detectionResult.model}
-              </h4>
-            </div>
-          </motion.div>
-        )}
-      </div>
-    </motion.div>
-  );
-};
 
-export default HerbalDetection;
+            {/* Category Selection */}
+            <div className="mb-6">
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                aria-label="Pilih kategori deteksi"
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="" disabled>Pilih kategori</option>
+                {categories.map((category) => (
+                  <option 
+                    key={category.value} 
+                    value={category.value}
+                    aria-describedby={`category-description-${category.value}`}
+                  >
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+              {/* Hidden descriptions for screen readers */}
+              {categories.map((category) => (
+                <span 
+                  key={`description-${category.value}`} 
+                  id={`category-description-${category.value}`} 
+                  className="sr-only"
+                >
+                  {category.description}
+                </span>
+              ))}
+            </div>
+
+            {/* Camera Error Display */}
+            {cameraError && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center">
+                <AlertTriangle className="text-red-500 mr-3" size={24} />
+                <p className="text-red-600 text-sm">{cameraError}</p>
+              </div>
+            )}
+
+            {/* General Error Display */}
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center">
+                <AlertTriangle className="text-red-500 mr-3" size={24} />
+                <p className="text-red-600 text-sm">{error}</p>
+              </div>
+            )}
+
+            {/* Camera/Upload Controls */}
+            <div className="flex justify-center gap-4 mb-6">
+              <button
+                onClick={toggleCamera}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors
+                  ${useCamera ? "bg-red-500 text-white hover:bg-red-600" : "bg-blue-500 text-white hover:bg-blue-600"}`}
+              >
+                {useCamera ? (
+                  <>
+                    <X size={18} /> Matikan Kamera
+                  </>
+                ) : (
+                  <>
+                    <Camera size={18} /> Gunakan Kamera
+                  </>
+                )}
+              </button>
+
+              {!useCamera && (
+                <div className="relative">
+                  <button
+                    onClick={handleUploadClick}
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-white border border-gray-300 hover:bg-gray-50 transition-colors"
+                  >
+                    <Upload size={18} />
+                    Unggah Gambar
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileChange}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Webcam Display */}
+            {useCamera && showWebcam && (
+              <div className="space-y-4">
+                <div className="relative rounded-lg overflow-hidden shadow-md">
+                  <Webcam
+                    audio={false}
+                    ref={webcamRef}
+                    screenshotFormat="image/jpeg"
+                    videoConstraints={videoConstraints}
+                    className="w-full"
+                  />
+                  {videoDevices.length > 1 && (
+                    <button
+                      onClick={switchCamera}
+                      className="absolute top-2 right-2 p-2 bg-white/50 rounded-full hover:bg-white/75 transition-colors"
+                      aria-label="Ganti Kamera"
+                    >
+                      <SwitchCamera size={24} className="text-gray-800" />
+                    </button>
+                  )}
+                </div>
+                <div className="flex gap-4">
+                  <button
+                    onClick={captureImage}
+                    className="flex-grow px-4 py-2 bg-green-500 text-white rounded-lg font-medium hover:bg-green-600 transition-colors"
+                  >
+                    Ambil Gambar
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Image Preview and Process Button */}
+            {(capturedImage || imageFile) && (
+              <div className="space-y-4">
+                <div className="relative">
+                  <button
+                    onClick={resetImage}
+                    className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors z-10"
+                    aria-label="Hapus Gambar"
+                  >
+                    <X size={18} />
+                  </button>
+                  <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-md">
+                    {capturedImage ? (
+                      <img
+                        src={capturedImage}
+                        alt="Pratinjau Gambar"
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                    ) : (
+                      imageFile && (
+                        <img
+                          src={URL.createObjectURL(imageFile)}
+                          alt="Gambar Unggahan"
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      )
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={handleSubmit}
+                  disabled={isLoading}
+                  className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg font-medium hover:bg-blue-600 transition-colors disabled:bg-blue-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader className="animate-spin" size={18} />
+                      Memproses...
+                    </>
+                  ) : (
+                    "Proses Gambar"
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        </main>
+
+        {/* Loading Overlay */}
+        {isLoading && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+            <div className="bg-white p-6 rounded-lg shadow-xl flex items-center gap-4">
+              <Loader className="animate-spin text-blue-500" size={32} />
+              <p className="text-gray-800 font-medium">Sedang memproses gambar...</p>
+            </div>
+          </div>
+        )}
+
+      </div>
+    </ErrorBoundary>
+  );
+}
+
+export default ImageDetection;

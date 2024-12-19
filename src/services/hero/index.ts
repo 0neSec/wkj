@@ -51,7 +51,7 @@ class HeroContentService {
             const response = await this.axiosInstance.post<{
                 message: string;
                 HeroContent: HeroContent;
-            }>('/admin/hero-content/', formData, {
+            }>('/admin/hero-content', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',  // Required for file uploads
                 },
@@ -67,7 +67,7 @@ class HeroContentService {
         try {
             const response = await this.axiosInstance.get<{
                 HeroContent: HeroContent[];
-            }>('/hero-content');
+            }>('/content/hero');
             return response.data.HeroContent;
         } catch (error) {
             this.handleError(error, 'Failed to retrieve HeroContent');

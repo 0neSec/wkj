@@ -1,10 +1,10 @@
-import axios, { AxiosError, AxiosInstance } from 'axios';
 
+import axios, { AxiosError, AxiosInstance } from 'axios';
 export interface FooterContent1 {
     id: number;
     title: string;
     description: string;
-    image?: File; // Explicitly a string (file path)
+    image?: File | string;
     created_at: string;
     updated_at: string;
 }
@@ -12,14 +12,14 @@ export interface FooterContent1 {
 export interface CreateFooterContent1Data {
     title: string;
     description: string;
-    image?: File;
+    image?: File | string;
 }
 
 export interface UpdateFooterContent1Data {
     id: number;
     title?: string;
     description?: string;
-    image?: File;
+    image?: File | string;
 }
 
 class FooterContent1Service {
@@ -35,7 +35,6 @@ class FooterContent1Service {
             timeout: 10000,
             headers: {
                 Authorization: `Bearer ${token}`,
-                'Content-Type': 'multipart/form-data',
             },
         });
     }
@@ -46,14 +45,18 @@ class FooterContent1Service {
             formData.append('title', data.title);
             formData.append('description', data.description);
             
-            if (data.image) {
+            if (data.image instanceof File) {
                 formData.append('image', data.image);
             }
-
+    
             const response = await this.axiosInstance.post<{
                 message: string;
                 FooterContent1: FooterContent1;
-            }>('/admin/footer/content-1/', formData);
+            }>('/admin/footer/content-1/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
             return response.data.FooterContent1;
         } catch (error) {
             this.handleError(error, 'Failed to create footer content 1');
@@ -61,21 +64,24 @@ class FooterContent1Service {
         }
     }
 
+    async getFooterContent1(): Promise<FooterContent1[]> {
+        try {
+            const response = await this.axiosInstance.get<{
+                FooterContent1: FooterContent1[];
+            }>('content/footer/content-1');
+            return response.data.FooterContent1;
+        } catch (error) {
+            this.handleError(error, 'Failed to retrieve footer content 1');
+            return [];
+        }
+    }
+
     async updateFooterContent1(data: UpdateFooterContent1Data): Promise<FooterContent1 | undefined> {
         try {
-            const formData = new FormData();
-            
-            if (data.title) formData.append('title', data.title);
-            if (data.description) formData.append('description', data.description);
-            
-            if (data.image) {
-                formData.append('image', data.image);
-            }
-
             const response = await this.axiosInstance.put<{
                 message: string;
                 FooterContent1: FooterContent1;
-            }>(`/admin/footer/content-1/${data.id}`, formData);
+            }>(`/admin/footer/content-1/${data.id}`, data);
             
             return response.data.FooterContent1;
         } catch (error) {
@@ -86,19 +92,6 @@ class FooterContent1Service {
             }
             this.handleError(error, 'Failed to update footer content 1');
             return undefined;
-        }
-    }
-
-    // Other methods remain the same
-    async getFooterContent1(): Promise<FooterContent1[]> {
-        try {
-            const response = await this.axiosInstance.get<{
-                FooterContent1: FooterContent1[];
-            }>('/content/footer/content-1');
-            return response.data.FooterContent1;
-        } catch (error) {
-            this.handleError(error, 'Failed to retrieve footer content 1');
-            return [];
         }
     }
 

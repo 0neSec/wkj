@@ -47,7 +47,7 @@ export default function ProdusenPage() {
           transition={{ duration: 0.5 }}
           className="text-3xl font-bold text-green-800 tracking-wide"
         >
-          Produsen Jamu Indonesia
+          Jamu manufacturer 
         </motion.h2>
 
         <motion.div

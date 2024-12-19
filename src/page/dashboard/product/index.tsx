@@ -360,6 +360,7 @@ const DashboardProductPage: React.FC = () => {
                         className="hidden"
                         id="image-upload"
                       />
+
                       <label
                         htmlFor="image-upload"
                         className="flex items-center bg-gray-100 px-4 py-2 rounded-lg cursor-pointer hover:bg-gray-200"
@@ -367,13 +368,11 @@ const DashboardProductPage: React.FC = () => {
                         <ImageIcon className="w-5 h-5 mr-2" />
                         Choose Image
                       </label>
-                      {imagePreview && (
                         <img
-                          src={imagePreview}
+                          src={`${process.env.REACT_APP_API_URL}${currentProduct.image}`}
                           alt="Product Preview"
                           className="w-20 h-20 object-cover rounded-lg"
                         />
-                      )}
                     </div>
                   </div>
 

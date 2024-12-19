@@ -1,8 +1,26 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Leaf, Facebook, Instagram, Twitter } from 'lucide-react';
+import { footerContent1Service } from '../../services/footer/alamat'; // Adjust path as needed
 
 const Footer = () => {
+  const [description, setDescription] = useState('');
   const currentYear = new Date().getFullYear();
+
+  useEffect(() => {
+    const fetchFooterContent = async () => {
+      try {
+        const footerContents = await footerContent1Service.getFooterContent1();
+        if (footerContents.length > 0) {
+          setDescription(footerContents[0].description);
+        }
+      } catch (error) {
+        console.error('Failed to fetch footer content', error);
+        setDescription('Farmakope: Empowering Herbal Wellness'); // Fallback description
+      }
+    };
+
+    fetchFooterContent();
+  }, []);
 
   return (
     <footer className="bg-green-800 text-white py-12">
@@ -15,7 +33,7 @@ const Footer = () => {
               <h3 className="text-2xl font-bold tracking-wide">Farmakope</h3>
             </div>
             <p className="text-green-200 text-center md:text-left">
-              Discover, explore, and understand herbal medicines with our comprehensive platform.
+              {description}
             </p>
           </div>
 
@@ -24,9 +42,10 @@ const Footer = () => {
             <h4 className="text-xl font-semibold mb-4">Quick Links</h4>
             <ul className="space-y-2 text-center">
               <li><a href="/" className="hover:text-green-300 transition-colors">Home</a></li>
-              <li><a href="/herbal-detection" className="hover:text-green-300 transition-colors">Herbal Detection</a></li>
+              <li><a href="/detection_tanaman" className="hover:text-green-300 transition-colors">Identifikasi Tanaman</a></li>
               <li><a href="/products" className="hover:text-green-300 transition-colors">Farmakope Herbal</a></li>
-              <li><a href="/stores" className="hover:text-green-300 transition-colors">Herbal Stores</a></li>
+              <li><a href="/jamu-central" className="hover:text-green-300 transition-colors">Central Jamu</a></li>
+              <li><a href="/produsen" className="hover:text-green-300 transition-colors">Produsen Jamu</a></li>
             </ul>
           </div>
 

@@ -92,6 +92,8 @@ class JamuCenterService {
                 JamuCenter: JamuCenter[];
             }>('/jamu-center');
             console.log(response);
+            console.log(response.data.JamuCenter);
+            
             return response.data.JamuCenter;
         } catch (error) {
             this.handleError(error, 'Failed to retrieve JamuCenters');

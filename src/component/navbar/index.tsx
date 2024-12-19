@@ -53,7 +53,7 @@ const Navbar = () => {
     { label: "Beranda", href: "/" },
     { label: "Identifikasi Tanaman", href: "/detection_tanaman" },
     { label: "Farmakope Herbal", href: "/product" },
-    { label: "Jamu Indonesia", href: "/store" },
+    { label: "Central Jamu", href: "/central-jamu" },
     { label: "Produsen Jamu", href: "/produsen" },
   ];
 

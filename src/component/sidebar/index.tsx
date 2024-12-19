@@ -113,25 +113,25 @@ const Sidebar: React.FC = () => {
     //     { label: "Struktur Organisasi", path: "/dashboard/content/struktur" },
     //   ],
     // },
-    // {
-    //   id: "banner",
-    //   label: "Banner",
-    //   icon: Wrench,
-    //   path: "/dashboard/banner",
-    // },
-    // {
-    //   id: "footer",
-    //   label: "Footer",
-    //   icon: ClipboardList,
-    //   path: "/dashboard/footer",
-    //   submenu: [
-    //     { label: "Alamat", path: "/dashboard/footer/alamat" },
-    //     { label: "Maps", path: "/dashboard/footer/maps" },
-    //     { label: "Kontak", path: "/dashboard/footer/contact" },
-    //     { label: "Timeline", path: "/dashboard/footer/timeline" },
-    //     { label: "Social Media", path: "/dashboard/footer/social-media" },
-    //   ],
-    // },
+    {
+      id: "banner",
+      label: "Banner",
+      icon: Wrench,
+      path: "/dashboard/banner",
+    },
+    {
+      id: "footer",
+      label: "Footer",
+      icon: ClipboardList,
+      path: "/dashboard/footer",
+      submenu: [
+        { label: "Alamat", path: "/dashboard/footer/alamat" },
+        // { label: "Maps", path: "/dashboard/footer/maps" },
+        // { label: "Kontak", path: "/dashboard/footer/contact" },
+        // { label: "Timeline", path: "/dashboard/footer/timeline" },
+        // { label: "Social Media", path: "/dashboard/footer/social-media" },
+      ],
+    },
   ];
   
 
@@ -294,11 +294,11 @@ const Sidebar: React.FC = () => {
           {!isCollapsed && (
             <div className="flex items-center space-x-3">
               <img 
-                src="/assets/logo.webp" 
+                src="/assets/wkj.webp" 
                 alt="Logo" 
                 className="h-10 w-auto"
               />
-              <h1 className="text-xl font-bold text-gray-800">WKJ KALIBAKUNG</h1>
+              <h1 className="text-xl font-bold text-gray-800">Wisata Kesahatan Jamu</h1>
             </div>
           )}
 

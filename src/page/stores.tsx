@@ -47,7 +47,7 @@ export default function StoresPage() {
           transition={{ duration: 0.5 }}
           className="text-3xl font-bold text-green-800 tracking-wide"
         >
-          Herbal Stores
+          Jamu Central
         </motion.h2>
 
         <motion.div
