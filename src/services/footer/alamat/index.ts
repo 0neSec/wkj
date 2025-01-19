@@ -1,5 +1,6 @@
-
+// services/footerContent1Service.ts
 import axios, { AxiosError, AxiosInstance } from 'axios';
+
 export interface FooterContent1 {
     id: number;
     title: string;
@@ -59,7 +60,7 @@ class FooterContent1Service {
             });
             return response.data.FooterContent1;
         } catch (error) {
-            this.handleError(error, 'Failed to create footer content 1');
+            this.handleError(error, 'Failed to create footer content');
             return undefined;
         }
     }
@@ -71,26 +72,42 @@ class FooterContent1Service {
             }>('content/footer/content-1');
             return response.data.FooterContent1;
         } catch (error) {
-            this.handleError(error, 'Failed to retrieve footer content 1');
+            this.handleError(error, 'Failed to retrieve footer content');
             return [];
         }
     }
 
     async updateFooterContent1(data: UpdateFooterContent1Data): Promise<FooterContent1 | undefined> {
         try {
+            const formData = new FormData();
+            
+            if (data.title !== undefined) {
+                formData.append('title', data.title);
+            }
+            
+            if (data.description !== undefined) {
+                formData.append('description', data.description);
+            }
+            
+            if (data.image instanceof File) {
+                formData.append('image', data.image);
+            }
+    
             const response = await this.axiosInstance.put<{
                 message: string;
                 FooterContent1: FooterContent1;
-            }>(`/admin/footer/content-1/${data.id}`, data);
+            }>(`/admin/footer/content-1/${data.id}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
             
             return response.data.FooterContent1;
         } catch (error) {
-            if (error instanceof AxiosError) {
-                if (error.response?.status === 409) {
-                    throw new Error("Conflict: A footer content 1 with this data already exists.");
-                }
+            if (error instanceof AxiosError && error.response?.status === 409) {
+                throw new Error("Conflict: A footer content with this data already exists.");
             }
-            this.handleError(error, 'Failed to update footer content 1');
+            this.handleError(error, 'Failed to update footer content');
             return undefined;
         }
     }
@@ -99,7 +116,7 @@ class FooterContent1Service {
         try {
             await this.axiosInstance.delete(`/admin/footer/content-1/${id}`);
         } catch (error) {
-            this.handleError(error, 'Failed to delete footer content 1');
+            this.handleError(error, 'Failed to delete footer content');
         }
     }
 

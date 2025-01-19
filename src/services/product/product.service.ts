@@ -8,7 +8,7 @@ export interface ProductCategory {
 }
 
 export interface Product {
-    id: number; // Changed from string to number to match Go model
+    id: number;
     name: string;
     latin_name: string;
     synonym: string;
@@ -21,7 +21,7 @@ export interface Product {
     efficacy: string;
     utilization?: string;
     composition?: string;
-    image:  File | string;
+    image: File | string;
     research_results: string;
     description: string;
     price: number;
@@ -56,7 +56,7 @@ export interface CreateProductData {
 }
 
 export interface UpdateProductData extends CreateProductData {
-    id: number; // Changed from string to number to match Go model
+    id: number;
 }
 
 class ProductService {
@@ -76,25 +76,63 @@ class ProductService {
         });
     }
 
+    private validateNumericField(value: any, fieldName: string): string | undefined {
+        if (value === undefined || value === null) {
+            return undefined;
+        }
+        
+        const numValue = Number(value);
+        if (isNaN(numValue)) {
+            throw new Error(`Invalid ${fieldName}: must be a valid number`);
+        }
+        return numValue.toString();
+    }
+
+    private formatMultilineField(value: string): string {
+        // Remove any numbered list formatting and preserve only the text
+        return value.split('\n')
+            .map(line => line.trim())
+            .map(line => line.replace(/^\d+\.\s*/, '')) // Remove numbered list format
+            .filter(line => line.length > 0) // Remove empty lines
+            .join('\n');
+    }
+
+    private appendFormData(formData: FormData, data: Record<string, any>) {
+        Object.entries(data).forEach(([key, value]) => {
+            if (value === undefined || value === null) {
+                return;
+            }
+
+            switch (key) {
+                case 'utilization':
+                case 'composition':
+                    // Handle multiline text fields
+                    formData.append(key, this.formatMultilineField(value.toString()));
+                    break;
+
+                case 'image':
+                    formData.append('image', value);
+                    break;
+                
+                case 'id':
+                case 'price':
+                case 'product_category_id':
+                    const validatedValue = this.validateNumericField(value, key);
+                    if (validatedValue) {
+                        formData.append(key, validatedValue);
+                    }
+                    break;
+                
+                default:
+                    formData.append(key, value.toString());
+            }
+        });
+    }
+
     async createProduct(data: CreateProductData): Promise<Product | undefined> {
         try {
             const formData = new FormData();
-            
-            Object.entries(data).forEach(([key, value]) => {
-                if (key === 'utilization') {
-                    if (value) {
-                        formData.append(key, JSON.stringify({ values: value }));
-                    }
-                } else if (key === 'composition') {
-                    if (value) {
-                        formData.append(key, JSON.stringify({ values: value }));
-                    }
-                } else if (key === 'image') {
-                    formData.append('image', value);
-                } else if (value !== undefined && value !== null) {
-                    formData.append(key, value.toString());
-                }
-            });
+            this.appendFormData(formData, data);
     
             const response = await this.axiosInstance.post<{
                 message: string;
@@ -103,7 +141,6 @@ class ProductService {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
     
-            console.log('Product created:', response);
             return response.data.Product;
         } catch (error) {
             this.handleError(error, 'Failed to create product');
@@ -111,34 +148,10 @@ class ProductService {
         }
     }
 
-    async getProduct(id: number): Promise<Product | undefined> {
-        try {
-            const response = await this.axiosInstance.get<{
-                Product: Product;
-            }>(`/product/${id}`);
-            console.log(response.data);
-            
-            return response.data.Product;
-        } catch (error) {
-            this.handleError(error, 'Failed to retrieve product');
-            return undefined;
-        }
-    }
-
     async updateProduct(data: UpdateProductData): Promise<Product | undefined> {
         try {
             const formData = new FormData();
-            Object.entries(data).forEach(([key, value]) => {
-                if (key === 'utilization' || key === 'composition') {
-                    if (value) {
-                        formData.append(key, JSON.stringify({ values: value }));
-                    }
-                } else if (key === 'image') {
-                    formData.append('image', value);
-                } else if (value !== undefined && value !== null) {
-                    formData.append(key, value.toString());
-                }
-            });
+            this.appendFormData(formData, data);
     
             const response = await this.axiosInstance.put<{
                 message: string;
@@ -148,7 +161,6 @@ class ProductService {
             });
     
             return response.data.Product;
-    
         } catch (error) {
             if (error instanceof AxiosError && error.response?.status === 409) {
                 throw new Error("Conflict: A product with this data already exists.");
@@ -180,6 +192,19 @@ class ProductService {
         }
     }
 
+    async getProduct(id: number): Promise<Product | undefined> {
+        try {
+            const response = await this.axiosInstance.get<{
+                Product: Product;
+            }>(`/product/${id}`);
+            console.log(response.data);
+            
+            return response.data.Product;
+        } catch (error) {
+            this.handleError(error, 'Failed to retrieve product');
+            return undefined;
+        }
+    }
     async getProductsByName(name: string): Promise<Product[]> {
         try {
             const response = await this.axiosInstance.get<{

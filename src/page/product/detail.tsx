@@ -18,6 +18,79 @@ import { JamuCenter, jamuCenterService } from '../../services/central';
 import Navbar from '../../component/navbar';
 import Footer from '../../component/footer';
 
+// Utility function to transform string data into array
+const transformToList = (value: string | undefined | null): string[] => {
+  if (!value || typeof value !== 'string') return [];
+  
+  // Case 1: Handle quoted strings separated by commas
+  const quotedPattern = /^"([^"]*)"(?:\s*,\s*"([^"]*)")*$/;
+  if (quotedPattern.test(value)) {
+    return value
+      .split(',')
+      .map(item => item.trim().replace(/^"|"$/g, ''))
+      .filter(Boolean);
+  }
+  
+  // Case 2: Handle line break separated items
+  const lineBreakPattern = /^[^\n]+(?:\n[^\n]+)*$/;
+  if (lineBreakPattern.test(value)) {
+    return value
+      .split('\n')
+      .map(item => item.trim())
+      .filter(Boolean);
+  }
+  
+  return [value];
+};
+
+// Render function for lists
+const renderList = (value: string | undefined | null): React.ReactNode => {
+  try {
+    const items = transformToList(value);
+    
+    if (items.length === 0) return null;
+    
+    return (
+      <ul className="list-disc pl-4 space-y-1">
+        {items.map((item: string, idx: number) => (
+          <li key={idx} className="text-base text-gray-600">{item}</li>
+        ))}
+      </ul>
+    );
+  } catch (error) {
+    console.error('Error rendering list:', error);
+    return null;
+  }
+};
+
+// Render function for research links
+const renderResearchLinks = (value: string | undefined | null): React.ReactNode => {
+  if (!value || typeof value !== 'string') return null;
+  
+  try {
+    const links = value.split(',').map(url => url.trim());
+    return (
+      <div className="space-y-2">
+        {links.map((url: string, idx: number) => (
+          <a
+            key={idx}
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center text-blue-600 hover:text-blue-800 hover:underline text-sm group"
+          >
+            <span className="mr-1">Lihat penelitian {idx + 1}</span>
+            <span className="transform transition-transform group-hover:translate-x-1">→</span>
+          </a>
+        ))}
+      </div>
+    );
+  } catch (error) {
+    console.error('Error rendering research links:', error);
+    return null;
+  }
+}
+
 const ProductDetailSkeleton = memo(() => (
   <div className="container mx-auto px-4 py-8 lg:py-12">
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 animate-pulse">
@@ -36,6 +109,7 @@ const ProductDetailSkeleton = memo(() => (
     </div>
   </div>
 ));
+
 type RenderFunction = (value: string | undefined) => React.ReactNode;
 
 interface DetailItem {
@@ -43,6 +117,7 @@ interface DetailItem {
   value: string | undefined;
   render?: RenderFunction;
 }
+
 const ProductDetail: React.FC = memo(() => {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -56,33 +131,27 @@ const ProductDetail: React.FC = memo(() => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProduct = async () => {
       try {
-        if (!id) {
-          throw new Error('ID Produk tidak ditemukan');
+        if (!id) return;
+        const products = await productService.getProductsByName(id);
+  
+        if (products && products.length > 0) {
+          const productData = await productService.getProductById(products[0].id);
+          setProduct(productData || null);
+        } else {
+          setError("Product not found");
         }
-        const [fetchedProduct, fetchedJamuCenters] = await Promise.all([
-          productService.getProductById(Number(id)),
-          jamuCenterService.getJamuCenters()
-        ]);
-        
-        setProduct(fetchedProduct ?? null);
-        setJamuCenters(fetchedJamuCenters);
+      } catch (error) {
+        console.error("Error fetching product:", error);
+        setError("Failed to load product details");
+      } finally {
         setLoading(false);
-      } catch (err) {
-        console.error('Gagal mengambil data', err);
-        setError(err instanceof Error ? err.message : 'Gagal memuat data');
-        setLoading(false);
-        toast.error('Gagal memuat data', {
-          description: 'Silakan periksa koneksi internet Anda.',
-          duration: 3000
-        });
       }
     };
-
-    fetchData();
+  
+    fetchProduct();
   }, [id]);
 
   const handleQuantityChange = (change: number) => {
@@ -163,6 +232,7 @@ const ProductDetail: React.FC = memo(() => {
       </div>
     );
   }
+
   const productDetails: DetailItem[] = [
     { label: 'Nama Latin', value: product.latin_name },
     { label: 'Sinonim', value: product.synonym },
@@ -176,69 +246,20 @@ const ProductDetail: React.FC = memo(() => {
     { label: 'Morfologi', value: product.morphology },
     { label: 'Nama Area', value: product.area_name },
     { label: 'Efektivitas', value: product.efficacy },
-    { label: 'Utilisasi', 
+    { 
+      label: 'Utilisasi', 
       value: product.utilization,
-      render: (value: string | undefined) => {
-        if (!value) return null;
-        
-        const items = value
-          .split(',')
-          .map((item: string) => item.trim().replace(/^"|"$/g, ''))
-          .filter(Boolean);
-        
-        return (
-          <ul className="list-disc pl-4 space-y-1">
-            {items.map((item: string, idx: number) => (
-              <li key={idx} className="text-base text-gray-600">{item}</li>
-            ))}
-          </ul>
-        );
-      }
+      render: renderList
     },
     { 
       label: 'Komposisi',
       value: product.composition,
-      render: (value: string | undefined) => {
-        if (!value) return null;
-        
-        const items = value
-          .split(',')
-          .map((item: string) => item.trim().replace(/^"|"$/g, ''))
-          .filter(Boolean);
-        
-        return (
-          <ul className="list-disc pl-4 space-y-1">
-            {items.map((item: string, idx: number) => (
-              <li key={idx} className="text-base text-gray-600">{item}</li>
-            ))}
-          </ul>
-        );
-      }
+      render: renderList
     },
     { 
       label: 'Hasil Penelitian',
       value: product.research_results,
-      render: (value: string | undefined) => {
-        if (!value) return null;
-        
-        const links = value.split(',').map((url: string) => url.trim());
-        return (
-          <div className="space-y-2">
-            {links.map((url: string, idx: number) => (
-              <a
-                key={idx}
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center text-blue-600 hover:text-blue-800 hover:underline text-sm group"
-              >
-                <span className="mr-1">Lihat penelitian {idx + 1}</span>
-                <span className="transform transition-transform group-hover:translate-x-1">→</span>
-              </a>
-            ))}
-          </div>
-        );
-      }
+      render: renderResearchLinks
     }
   ];
 
@@ -247,7 +268,6 @@ const ProductDetail: React.FC = memo(() => {
       <Navbar />
       <main className="flex-grow mt-10">
         <div className="container mx-auto px-4 py-6 lg:py-12">
-          {/* Breadcrumb Navigation */}
           <button 
             onClick={() => navigate('/product')}
             className="inline-flex items-center text-sm text-gray-600 hover:text-gray-800 mb-6 transition-colors"
@@ -256,9 +276,7 @@ const ProductDetail: React.FC = memo(() => {
             Kembali ke Daftar Produk
           </button>
 
-          {/* Main Product Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 bg-white p-6 rounded-2xl shadow-sm">
-            {/* Product Image */}
             <div className="relative">
               <AnimatePresence>
                 {!imageLoaded && (
@@ -280,7 +298,6 @@ const ProductDetail: React.FC = memo(() => {
               />
             </div>
 
-            {/* Product Info */}
             <div className="flex flex-col justify-start space-y-6">
               <div className="space-y-2">
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
@@ -293,7 +310,6 @@ const ProductDetail: React.FC = memo(() => {
                 Rp {product.price.toLocaleString('id-ID')}
               </div>
 
-              {/* Quantity Selector */}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-gray-700">Kuantitas</label>
                 <div className="flex items-center space-x-4">
@@ -315,7 +331,6 @@ const ProductDetail: React.FC = memo(() => {
                 </div>
               </div>
 
-              {/* Jamu Center Selection */}
               <div className="space-y-3">
                 <label className="text-sm font-medium text-gray-700">
                   Pilih Jamu Center untuk Pemesanan
@@ -340,13 +355,11 @@ const ProductDetail: React.FC = memo(() => {
                 </div>
               </div>
 
-              {/* Selected Jamu Center Info */}
               {selectedJamuCenter && (
                 <div className="p-4 bg-blue-50 rounded-lg space-y-3 border border-blue-100">
                   <h3 className="text-lg font-semibold text-blue-900">{selectedJamuCenter.name}</h3>
-                  {/* <p className="text-sm text-blue-800">{selectedJamuCenter.description}</p> */}
                   <div className="space-y-2">
-                    <div className="flex items-start text-blue-800 text-sm">
+                  <div className="flex items-start text-blue-800 text-sm">
                       <MapPin size={16} className="mr-2 mt-1 flex-shrink-0" />
                       <span>{selectedJamuCenter.address}</span>
                     </div>
@@ -372,7 +385,6 @@ const ProductDetail: React.FC = memo(() => {
                 </div>
               )}
 
-              {/* Action Buttons */}
               <div className="space-y-3 pt-4">
                 <motion.button
                   onClick={handlePesanSekarang}
@@ -407,80 +419,76 @@ const ProductDetail: React.FC = memo(() => {
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
                     className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm font-medium"
-                    >
-                      <Share2 size={18} className="mr-2 text-gray-400" />
-                      <span className="hidden sm:inline">Bagikan</span>
-                      <span className="sm:hidden">Share</span>
-                    </motion.button>
-                  </div>
+                  >
+                    <Share2 size={18} className="mr-2 text-gray-400" />
+                    <span className="hidden sm:inline">Bagikan</span>
+                    <span className="sm:hidden">Share</span>
+                  </motion.button>
                 </div>
               </div>
             </div>
-  
-            {/* Product Details Sections */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mt-8">
-          {/* Product Details Column */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm space-y-6">
-            <h2 className="text-xl font-bold text-gray-900 pb-2 border-b border-gray-200">
-              Detail Produk
-            </h2>
-            {productDetails.map((detail, index) => (
-              detail.value && (
-                <div 
-                  key={index} 
-                  className="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0"
-                >
-                  <strong className="text-sm font-semibold text-gray-800 block mb-1">
-                    {detail.label}
-                  </strong>
-                  <p className="text-base text-gray-600 leading-relaxed">
-                    {detail.value}
-                  </p>
-                </div>
-              )
-            ))}
           </div>
-  
-              {/* Additional Information Column */}
-              <div className="bg-white p-6 rounded-2xl shadow-sm space-y-6">
-            <h2 className="text-xl font-bold text-gray-900 pb-2 border-b border-gray-200">
-              Informasi Tambahan
-            </h2>
-            {additionalInfo.map((detail, index) => (
-              detail.value && (
-                <div 
-                  key={index} 
-                  className="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0"
-                >
-                  <strong className="text-sm font-semibold text-gray-800 block mb-2">
-                    {detail.label}
-                  </strong>
-                  {detail.render ? 
-                    detail.render(detail.value) : 
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 mt-8">
+            <div className="bg-white p-6 rounded-2xl shadow-sm space-y-6">
+              <h2 className="text-xl font-bold text-gray-900 pb-2 border-b border-gray-200">
+                Detail Produk
+              </h2>
+              {productDetails.map((detail, index) => (
+                detail.value && (
+                  <div 
+                    key={index} 
+                    className="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0"
+                  >
+                    <strong className="text-sm font-semibold text-gray-800 block mb-1">
+                      {detail.label}
+                    </strong>
                     <p className="text-base text-gray-600 leading-relaxed">
                       {detail.value}
                     </p>
-                  }
-                </div>
-              )
-            ))}
-          </div>
-  
-              {/* Full Width Description */}
-              <div className="col-span-1 lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm space-y-4">
-                <h2 className="text-xl font-bold text-gray-900 pb-2 border-b border-gray-200">
-                  Deskripsi Produk
-                </h2>
-                <p className="text-base text-gray-600 leading-relaxed">
-                  {product.description}
-                </p>
-              </div>
+                  </div>
+                )
+              ))}
+            </div>
+
+            <div className="bg-white p-6 rounded-2xl shadow-sm space-y-6">
+              <h2 className="text-xl font-bold text-gray-900 pb-2 border-b border-gray-200">
+                Informasi Tambahan
+              </h2>
+              {additionalInfo.map((detail, index) => (
+                detail.value && (
+                  <div 
+                    key={index} 
+                    className="border-b border-gray-100 pb-4 last:border-b-0 last:pb-0"
+                  >
+                    <strong className="text-sm font-semibold text-gray-800 block mb-2">
+                      {detail.label}
+                    </strong>
+                    {detail.render ? 
+                      detail.render(detail.value) : 
+                      <p className="text-base text-gray-600 leading-relaxed">
+                        {detail.value}
+                      </p>
+                    }
+                  </div>
+                )
+              ))}
+            </div>
+
+            <div className="col-span-1 lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm space-y-4">
+              <h2 className="text-xl font-bold text-gray-900 pb-2 border-b border-gray-200">
+                Deskripsi Produk
+              </h2>
+              <p className="text-base text-gray-600 leading-relaxed">
+                {product.description}
+              </p>
             </div>
           </div>
-        </main>
-        <Footer />
-      </div>
-    );
-  });
-  
-  export default ProductDetail;
+        </div>
+      </main>
+      <Footer />
+    </div>
+  );
+});
+
+export default ProductDetail;

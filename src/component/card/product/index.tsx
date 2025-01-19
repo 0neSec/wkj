@@ -13,18 +13,20 @@ import {
   Product,
 } from "../../../services/product/product.service";
 import { productCategoryService } from "../../../services/product/product-category.service";
-import { useNavigate } from "react-router-dom";
 
-// Pagination Options
 const paginationOptions = [10, 25, 50, 100];
 
 type OnDetailClickType = (productOrId: Product | number) => void;
 
-// Product Card Component
+
 const ProductCard: React.FC<{
   product: Product;
   onDetailClick: OnDetailClickType;
 }> = ({ product, onDetailClick }) => {
+  const handleDetailClick = () => {
+    onDetailClick(product);
+  };
+
   return (
     <motion.div
       whileHover={{ scale: 1.05 }}
@@ -50,7 +52,7 @@ const ProductCard: React.FC<{
           </span>
           <div className="flex space-x-2">
             <motion.button
-              onClick={() => onDetailClick(product.id)}
+              onClick={handleDetailClick}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               className="bg-green-600 text-white px-2 py-1 sm:px-3 sm:py-2 rounded-full hover:bg-green-700 transition flex items-center text-xs sm:text-sm"
@@ -64,7 +66,6 @@ const ProductCard: React.FC<{
   );
 };
 
-// Product Listing Component
 interface ProductListProps {
   isHomePage?: boolean;
 }
@@ -73,26 +74,19 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-  // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [productsPerPage, setProductsPerPage] = useState(isHomePage ? 6 : 12);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<string[]>(["All"]);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const navigate = useNavigate();
 
-  // Fetch products on component mount
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setIsLoading(true);
-        const fetchedProducts =
-          await productService.getAllProductsWithCategories();
-        const fetchedCategories =
-          await productCategoryService.getAllProductCategories();
+        const fetchedProducts = await productService.getAllProductsWithCategories();
+        const fetchedCategories = await productCategoryService.getAllProductCategories();
         setCategories([
           "All",
           ...fetchedCategories.map((category) => category.name),
@@ -109,7 +103,6 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
     fetchProducts();
   }, []);
 
-  // Filter products based on search and category
   const filteredProducts = products.filter((product) =>
     isHomePage
       ? true
@@ -118,7 +111,6 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
           product.product_category_name === selectedCategory)
   );
 
-  // Pagination Calculations
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
   const currentProducts = filteredProducts.slice(
@@ -126,31 +118,26 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
     isHomePage ? 6 : indexOfLastProduct
   );
 
-  // Calculate total pages
   const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
-  // Pagination Change Handlers
   const handlePageChange = (pageNumber: number) => {
     setCurrentPage(pageNumber);
   };
 
   const handleProductsPerPageChange = (number: number) => {
     setProductsPerPage(number);
-    setCurrentPage(1); // Reset to first page when changing products per page
+    setCurrentPage(1);
   };
 
-  
   const handleProductDetail = (productOrId: Product | number) => {
-    if (typeof productOrId === "number") {
-      // Navigate to product detail page
-      navigate(`/product/${productOrId}`);
-    } else {
-      // If you still want to keep the old modal logic
-      setSelectedProduct(productOrId);
+    const id = typeof productOrId === 'number' ? productOrId : productOrId.id;
+    const product = products.find(p => p.id === id);
+    if (product) {
+      const encodedName = encodeURIComponent(product.name);
+      window.location.href = `/product/${encodedName}`;
     }
   };
 
-  // Render loading state
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 text-center">
@@ -159,7 +146,6 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
     );
   }
 
-  // Render error state
   if (error) {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 text-center">
@@ -172,7 +158,6 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
       {!isHomePage && (
         <div className="flex flex-col sm:flex-row mb-6 sm:mb-8 space-y-4 sm:space-y-0 sm:space-x-4">
-          {/* Mobile Sidebar Toggle */}
           <button
             onClick={() => setIsSidebarOpen(true)}
             className="md:hidden self-start text-gray-700"
@@ -180,7 +165,6 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
             <Filter size={24} />
           </button>
 
-          {/* Search Input */}
           <div className="flex-grow relative">
             <input
               type="text"
@@ -188,7 +172,7 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
               value={searchTerm}
               onChange={(e) => {
                 setSearchTerm(e.target.value);
-                setCurrentPage(1); // Reset to first page when searching
+                setCurrentPage(1);
               }}
               className="w-full px-3 py-2 sm:px-4 sm:py-2 border rounded-full pl-8 sm:pl-10 text-sm sm:text-base"
             />
@@ -201,10 +185,8 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
       )}
 
       <div className="flex flex-col sm:flex-row">
-        {/* Sidebar */}
         {!isHomePage && (
           <>
-            {/* Desktop Sidebar */}
             <div className="hidden md:block w-64 pr-8">
               <h3 className="text-base sm:text-xl font-bold mb-4">
                 Categories
@@ -224,7 +206,6 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
               ))}
             </div>
 
-            {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && (
               <div
                 className="fixed inset-0 bg-black/50 z-40 md:hidden"
@@ -268,11 +249,9 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
           </>
         )}
 
-        {/* Product Grid */}
         <div
           className={`w-full ${!isHomePage ? "md:w-[calc(100%-16rem)]" : ""}`}
         >
-          {/* If no products found */}
           {currentProducts.length === 0 ? (
             <div className="text-center py-8 sm:py-12">
               <p className="text-base sm:text-xl text-gray-500">
@@ -281,7 +260,6 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
             </div>
           ) : (
             <>
-              {/* Product Grid - Modified to 3 columns */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {currentProducts.map((product) => (
                   <ProductCard
@@ -292,10 +270,8 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
                 ))}
               </div>
 
-              {/* Pagination Controls (only for product page, not home page) */}
               {!isHomePage && totalPages > 1 && (
                 <div className="mt-8 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-                  {/* Products Per Page Selector */}
                   <div className="w-full md:w-auto text-center md:text-left">
                     <label
                       htmlFor="products-per-page"
@@ -319,9 +295,7 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
                     </select>
                   </div>
 
-                  {/* Pagination Navigation */}
                   <div className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto">
-                    {/* Previous Button */}
                     <button
                       onClick={() => handlePageChange(currentPage - 1)}
                       disabled={currentPage === 1}
@@ -330,7 +304,6 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
                       <ChevronLeft size={16} />
                     </button>
 
-                    {/* Page Numbers */}
                     {[...Array(totalPages)].map((_, index) => (
                       <button
                         key={index}
@@ -345,7 +318,6 @@ const ProductList: React.FC<ProductListProps> = ({ isHomePage = false }) => {
                       </button>
                     ))}
 
-                    {/* Next Button */}
                     <button
                       onClick={() => handlePageChange(currentPage + 1)}
                       disabled={currentPage === totalPages}

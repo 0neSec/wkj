@@ -4,7 +4,8 @@ import Sidebar from "../../../../component/sidebar";
 import { 
   FooterContent1, 
   CreateFooterContent1Data, 
-  footerContent1Service 
+  footerContent1Service, 
+  UpdateFooterContent1Data
 } from "../../../../services/footer/alamat";
 
 const DashboardFooterContent1Page: React.FC = () => {
@@ -79,31 +80,38 @@ const DashboardFooterContent1Page: React.FC = () => {
 
   const handleSaveFooterContent = async () => {
     try {
-      const contentToSave: CreateFooterContent1Data = {
-        title: currentFooterContent.title || '',
-        description: currentFooterContent.description || '',
-        image: currentFooterContent.imageFile
-      };
-  
-      if (isEditing && currentFooterContent.id) {
-        await footerContent1Service.updateFooterContent1({
-          id: currentFooterContent.id,
-          ...contentToSave
-        });
-      } else {
-        const newFooterContent = await footerContent1Service.createFooterContent1(contentToSave);
-        if (newFooterContent) {
-          setFooterContents([...footerContents, newFooterContent]);
+        const contentToSave: CreateFooterContent1Data | UpdateFooterContent1Data = {
+            title: currentFooterContent.title || '',
+            description: currentFooterContent.description || '',
+        };
+
+        if (currentFooterContent.imageFile) {
+            contentToSave.image = currentFooterContent.imageFile;
         }
-      }
-      
-      setIsModalOpen(false);
-      setImagePreview(null);
+
+        if (isEditing && currentFooterContent.id) {
+            await footerContent1Service.updateFooterContent1({
+                id: currentFooterContent.id,
+                ...contentToSave
+            });
+            
+            // Refresh the footer contents after update
+            const updatedContents = await footerContent1Service.getFooterContent1();
+            setFooterContents(updatedContents);
+        } else {
+            const newFooterContent = await footerContent1Service.createFooterContent1(contentToSave);
+            if (newFooterContent) {
+                setFooterContents([...footerContents, newFooterContent]);
+            }
+        }
+        
+        setIsModalOpen(false);
+        setImagePreview(null);
     } catch (err: any) {
-      console.error("Full error:", err);
-      alert(err.message || "Failed to save footer content");
+        console.error("Full error:", err);
+        alert(err.message || "Failed to save footer content");
     }
-  };
+};
 
   const handleDeleteFooterContent = async (id: number) => {
     if (window.confirm("Are you sure you want to delete this footer content?")) {

@@ -165,7 +165,7 @@ function ImageDetection() {
       if (result) {
         setDetectionResult(result);
         // Navigate directly using the label from the result
-        navigate(`/layanan/produk-layanan/${result.label}`);
+        navigate(`/product/${result.label}`);
       }
     } catch (err) {
       if (err instanceof Error) {

@@ -5,20 +5,24 @@ import {
 } from 'recharts';
 import { 
   Users, DollarSign, PackageIcon, Globe,
-  Menu, X
+  Menu, X,
+  Store
 } from 'lucide-react';
 import { productService } from '../../services/product/product.service';
 import Sidebar from '../../component/sidebar';
 import { visitorService } from '../../services/visitor';
+import { userService } from '../../services/user';
+import { herbalStoreService } from '../../services/store';
 
 const Dashboard = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [productCount, setProductCount] = useState(0);
   const [visitorCount, setVisitorCount] = useState(0);
+  const [userCount, setUserCount] = useState(0);
+  const [storeCount, setStoreCount] = useState(0);
   const [visitorData, setVisitorData] = useState<any[]>([]);
   const [recentVisitors, setRecentVisitors] = useState<any[]>([]);
   
-  // Sample data for existing charts
   const monthlyRevenue = [
     { name: 'Jan', amount: 4500 },
     { name: 'Feb', amount: 5200 },
@@ -28,28 +32,13 @@ const Dashboard = () => {
     { name: 'Jun', amount: 7500 }
   ];
 
-  const userStats = [
-    { month: 'Jan', active: 500, new: 120 },
-    { month: 'Feb', active: 580, new: 150 },
-    { month: 'Mar', active: 620, new: 180 },
-    { month: 'Apr', active: 700, new: 190 },
-    { month: 'May', active: 780, new: 220 },
-    { month: 'Jun', active: 850, new: 250 }
-  ];
-
-  const trainingData = [
-    { month: 'Jan', participants: 150 },
-    { month: 'Feb', participants: 220 },
-    { month: 'Mar', participants: 180 },
-    { month: 'Apr', participants: 280 },
-    { month: 'May', participants: 260 },
-    { month: 'Jun', participants: 300 }
-  ];
-
-  // Fetch counts and visitors
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // Fetch users
+        const users = await userService.getAllUsers();
+        setUserCount(users.length);
+
         // Fetch product count
         const products = await productService.getAllProducts();
         setProductCount(products.length);
@@ -58,27 +47,28 @@ const Dashboard = () => {
         const totalVisitors = await visitorService.getVisitorCount();
         setVisitorCount(totalVisitors);
 
-        // Fetch all visitors and process for charts and recent list
+        // Fetch store count
+        const stores = await herbalStoreService.getHerbalStores();
+        setStoreCount(stores.length);
+
+        // Fetch visitor data
         const allVisitors = await visitorService.getAllVisitors();
-        
-        // Prepare visitor data for monthly chart
         const processedVisitorData = processVisitorData(allVisitors);
         setVisitorData(processedVisitorData);
 
-        // Get 10 most recent visitors
+        // Get recent visitors
         const sortedVisitors = allVisitors
           .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
           .slice(0, 10);
         setRecentVisitors(sortedVisitors);
       } catch (error) {
-        console.error('Failed to fetch data', error);
+        console.error('Failed to fetch data:', error);
       }
     };
 
     fetchData();
   }, []);
 
-  // Process visitor data for monthly chart
   const processVisitorData = (visitors: any[]) => {
     const monthMap = new Map();
     
@@ -95,14 +85,14 @@ const Dashboard = () => {
   const statCards = [
     {
       title: 'Total Pengguna',
-      value: '8,549',
+      value: userCount.toString(),
       icon: Users,
       colorClass: 'bg-blue-50 text-blue-500'
     },
     {
-      title: 'Pendapatan',
-      value: 'Rp 245.6M',
-      icon: DollarSign,
+      title: 'Total Toko',
+      value: storeCount.toString(),
+      icon: Store,
       colorClass: 'bg-green-50 text-green-500'
     },
     {
